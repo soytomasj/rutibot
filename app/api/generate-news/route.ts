@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'Para buscar noticias reales de internet, configurá GEMINI_API_KEY en el archivo .env o configurá tu clave de entorno.' }, { status: 400 });
+      return NextResponse.json({ error: 'Falta la GEMINI_API_KEY. Por favor, asegúrate de haberla guardado en las Variables de Entorno de Vercel y luego hacé un Redeploy.' }, { status: 400 });
     }
 
     // Build the prompt
