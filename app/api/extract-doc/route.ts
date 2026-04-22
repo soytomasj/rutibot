@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+// @ts-ignore
 import WordExtractor from 'word-extractor';
 import fs from 'fs/promises';
 import path from 'path';
