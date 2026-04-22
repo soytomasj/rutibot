@@ -91,13 +91,14 @@ export async function POST(req: Request) {
     }
 
     // 2. If heuristic yields 0, try AI fallback if process.env.GEMINI_API_KEY exists
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
       return NextResponse.json({ error: 'No se encontraron menciones con el formato esperado. Por favor, asegúrate de haber guardado la variable GEMINI_API_KEY en Vercel (Settings -> Environment Variables) y haber hecho un Redeploy.' }, { status: 400 });
     }
 
     const pr = `Analiza el siguiente texto de un archivo comercial de radio argentina. Extrae TODAS las menciones comerciales. Para cada una identifica: cli (cliente), tipo (Mencion Live, Spot Grabado, etc), cant (veces por dia), txt (guion). Responde UNICAMENTE con JSON valido: {"menciones":[{"cli":"nombre","tipo":"Mencion Live","cant":1,"txt":"texto"}]}\n\nTEXTO:\n"""\n${text.substring(0, 3500)}\n"""\nSi no hay menciones claras responde: {"menciones":[]}`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

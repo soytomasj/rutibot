@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { artists, temas, fuentes, efemerides, contextDia, contextTemas, config, dateStr } = body;
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Falta la GEMINI_API_KEY. Por favor, asegúrate de haberla guardado en las Variables de Entorno de Vercel y luego hacé un Redeploy.' }, { status: 400 });
     }
