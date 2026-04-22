@@ -79,27 +79,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ menciones: result });
     }
 
-    // 2. If heuristic yields 0, try AI fallback if process.env.ANTHROPIC_API_KEY exists
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ error: 'No se encontraron menciones con el formato esperado. Para usar la detección avanzada con IA, configura la variable de entorno ANTHROPIC_API_KEY.' }, { status: 400 });
+    // 2. If heuristic yields 0, try AI fallback if process.env.GEMINI_API_KEY exists
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: 'No se encontraron menciones con el formato esperado. Para usar la detección avanzada con IA, configura la variable de entorno GEMINI_API_KEY.' }, { status: 400 });
     }
 
     const pr = `Analiza el siguiente texto de un archivo comercial de radio argentina. Extrae TODAS las menciones comerciales. Para cada una identifica: cli (cliente), tipo (Mencion Live, Spot Grabado, etc), cant (veces por dia), txt (guion). Responde UNICAMENTE con JSON valido: {"menciones":[{"cli":"nombre","tipo":"Mencion Live","cant":1,"txt":"texto"}]}\n\nTEXTO:\n"""\n${text.substring(0, 3500)}\n"""\nSi no hay menciones claras responde: {"menciones":[]}`;
 
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({ model: 'claude-3-5-sonnet-20240620', max_tokens: 1000, messages: [{ role: 'user', content: pr }] })
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: pr }] }],
+        generationConfig: { temperature: 0.2 }
+      })
     });
     
-    const d = await r.json();
+    const d = await response.json();
     if (d.error) throw new Error(d.error.message);
-    const raw = d.content.filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
-    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    const content = d.candidates[0].content.parts[0].text;
+    const cleanContent = content.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleanContent);
     return NextResponse.json(parsed);
 
   } catch (error: any) {
