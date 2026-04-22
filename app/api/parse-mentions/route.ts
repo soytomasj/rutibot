@@ -119,6 +119,9 @@ TEXTO:\n${text.substring(0, 5000)}`;
     });
     
     const d = await response.json();
+    if (!d.candidates || !d.candidates[0]) {
+       throw new Error(d.error?.message || 'La IA no pudo procesar este formato de texto.');
+    }
     const content = d.candidates[0].content.parts[0].text;
     const cleanContent = content.replace(/```json|```/g, '').trim();
     return NextResponse.json(JSON.parse(cleanContent));

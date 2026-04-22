@@ -436,8 +436,8 @@ textarea{resize:vertical;min-height:80px;}select option{background:#2424bc;}
         </div>
         <div class="fg">
           <label>Horarios de entrada de bloques</label>
-          <input type="text" id="blq_hrs" value="07:00, 08:00, 09:00, 10:00, 11:00" placeholder="Ej: 07:00, 08:00, 09:00" oninput="drwS()">
-          <div style="font-size:.68rem;color:var(--mu);margin-top:.3rem;font-family:'DM Mono',monospace;">La cantidad de horarios que ingreses define la cantidad de bloques.</div>
+          <input type="text" id="blq_hrs" value="07:00, 08:00, 09:00, 10:00, 11:00" placeholder="Ej: 1510 1525..." oninput="drwS()" onblur="smartTime(this)">
+          <div style="font-size:.68rem;color:var(--mu);margin-top:.3rem;font-family:'DM Mono',monospace;">Escribí números de corrido (ej: 1510) y al salir se formatean solos.</div>
         </div>
         <div class="fg"><label>Duracion tanda (min)</label><input type="number" id="dt" value="3" min="1" max="15"></div>
         <div class="div"></div>
@@ -1155,6 +1155,19 @@ function parseNblqs(str, nb) {
   return [...result].sort((a,b)=>a-b);
 }
 
+function smartTime(el) {
+  let val = el.value.replace(/[^\d]/g, '');
+  if (val.length >= 4) {
+    let chunks = val.match(/.{1,4}/g) || [];
+    let formatted = chunks.map(c => {
+      if (c.length === 4) return c.substring(0,2) + ':' + c.substring(2,4);
+      return c;
+    }).join(', ');
+    el.value = formatted;
+  }
+  drwS();
+}
+
 function drwS() {
   const blq_hrs = document.getElementById('blq_hrs')?.value || '07:00, 08:00, 09:00, 10:00, 11:00';
   const startTimes = blq_hrs.split(',').map(s => s.trim()).filter(s => s !== '');
@@ -1188,8 +1201,8 @@ function drwS() {
     const [hh, mn] = timeStr.split(':');
     const hasNot = notBlocks.includes(b);
     const notCount = notPerBlock[b] || 0;
-    rows += `<div class="brow">
-      <div class="btime">${hh.padStart(2,'0')}:${mn.padStart(2,'0')}</div>
+    rows += `<div class="brow" style="padding: 0.8rem 0; border-bottom-width: 2px;">
+      <div class="btime" style="font-size: 0.8rem; font-weight: bold;">${hh.padStart(2,'0')}:${mn.padStart(2,'0')}</div>
       <div class="bbars">
         <div class="bseg" style="width:${wM}%;background:rgba(76,201,240,.6);"></div>
         <div class="bseg" style="width:${wMe}%;background:rgba(124,204,30,.6);"></div>
