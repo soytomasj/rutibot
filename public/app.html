@@ -1401,32 +1401,54 @@ function expPDF() {
     let hora = (c[0]?.textContent||'').trim();
     let cont = c[2]?.innerHTML||'';
     if (hora) {
-       rows += `<tr><td colspan="3" style="padding-top:1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#1818a8;border-bottom:2px solid #1818a8;">${cont.replace(/_/g, '')}</td></tr>`;
+       // Fila de Entrada / Separador
+       rows += `<tr><td colspan="2" style="padding-top:2.5rem; padding-bottom:0.5rem;">
+         <div style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:#1818a8; border-bottom:3px solid #1818a8; display:flex; align-items:center; gap:10px;">
+           <span style="white-space:nowrap;">${cont.replace(/_/g, '').trim()}</span>
+           <div style="flex:1; height:3px; background:#1818a8; opacity:0.1;"></div>
+         </div>
+       </td></tr>`;
     } else {
-       rows += `<tr><td style="width:20px;"></td><td style="width:20px;vertical-align:top;padding-top:.8rem;">${c[1]?.innerHTML||''}</td><td style="padding:.8rem 0;line-height:1.6;font-size:.85rem;">${cont}</td></tr>`;
+       // Fila de Mencion / Noticia
+       // El contenido ya trae los <b> del titulo desde genF
+       rows += `<tr>
+         <td style="width:40px; vertical-align:top; padding-top:1.2rem; opacity:0.3;">${c[1]?.innerHTML||''}</td>
+         <td style="padding:1rem 0; line-height:1.6; font-size:1rem; color:#333; border-bottom:1px solid #eee;">${cont}</td>
+       </tr>`;
     }
   });
   const win = window.open('','_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rutina E40</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=DM+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono&display=swap" rel="stylesheet">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;color:#222;padding:1.5cm;font-size:13px;}
-    .hdr{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #1818a8;padding-bottom:.8rem;margin-bottom:1.5rem;}
-    .logo{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;color:#1818a8;}.logo b{color:#5faa10;}
-    .meta{text-align:right;font-family:'DM Mono',monospace;font-size:.65rem;color:#666;line-height:1.7;}
-    table{width:100%;border-collapse:collapse;}
-    td{vertical-align:top;border-bottom:1px solid #eaeaea;}
-    b{font-weight:700;color:#111;font-size:.9rem;}
-    .tpill{display:none;} /* Escondemos las pildoritas de colores en el PDF para que sea mas limpio */
-    .footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.6rem;color:#aaa;}
-    @page{size:A4;margin:1.5cm;} @media print{body{padding:0;} .hdr{border-bottom:3px solid #1818a8 !important; -webkit-print-color-adjust: exact;}}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif; color:#222; padding:1.5cm; font-size:14px; background:#fff;}
+    .hdr{display:flex; align-items:flex-start; justify-content:space-between; border-bottom:4px solid #1818a8; padding-bottom:1rem; margin-bottom:1rem;}
+    .logo{font-family:'Bebas Neue',sans-serif; font-size:2.8rem; letter-spacing:5px; color:#1818a8; line-height:1;}
+    .logo b{color:#7ccc1e;}
+    .meta{text-align:right; font-family:'DM Mono',monospace; font-size:0.7rem; color:#555; line-height:1.6;}
+    .prog-info{font-size:1rem; font-weight:500; color:#444; margin-top:0.5rem; font-family:'Bebas Neue',sans-serif; letter-spacing:2px;}
+    table{width:100%; border-collapse:collapse;}
+    td{vertical-align:top;}
+    b{font-weight:700; color:#000; font-size:1.05rem; text-transform:uppercase; display:block; margin-bottom:0.2rem;}
+    .tpill{ opacity: 0.5; transform: scale(0.8); transform-origin: left top; display: inline-block; }
+    .footer{margin-top:3rem; padding-top:1rem; border-top:1px solid #eee; display:flex; justify-content:space-between; font-family:'DM Mono',monospace; font-size:0.6rem; color:#bbb;}
+    @page{size:A4; margin:0;} 
+    @media print{
+      body{padding:1.5cm;}
+      .hdr{border-bottom:4px solid #1818a8 !important; -webkit-print-color-adjust: exact;}
+      b{color:#000 !important;}
+    }
   </style></head><body>
   <div class="hdr">
-    <div><div class="logo">E<b>4</b>0 RutiBot</div><div style="font-size:.85rem;color:#555;margin-top:.4rem;">${p?.nombre||''} — ${p?.conductor||''}${p?.productor ? ' — Prod: ' + p.productor : ''}</div></div>
+    <div>
+      <div class="logo">E<b>4</b>0 RUTIBOT</div>
+      <div class="prog-info">${p?.nombre||''} — ${p?.conductor||''}${p?.productor ? ' | PROD: ' + p.productor : ''}</div>
+    </div>
     <div class="meta">RUTINA DIARIA<br>${dt}<br>${new Date().toLocaleTimeString('es-AR')}</div>
   </div>
   <table><tbody>${rows}</tbody></table>
-  <div class="footer"><span>E40 Radio — RutiBot</span><span>${dt}</span></div>
+  <div class="footer"><span>E40 RADIO — RUTIBOT</span><span>${dt}</span></div>
   <script>window.onload=()=>window.print();<\/script>
   </body></html>`);
   win.document.close();

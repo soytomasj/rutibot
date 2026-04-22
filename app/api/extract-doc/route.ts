@@ -12,26 +12,44 @@ export async function POST(req: Request) {
     const file = formData.get('file') as File;
     if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const rawContent = buffer.toString('utf-8');
+    const buffer = await file.arrayBuffer();
+    const nodeBuffer = Buffer.from(buffer);
+    
+    // Intentar detectar si es un HTML (ScriptCase export)
+    // Probamos decodificar con Latin1 (ISO-8859-1) que es lo que usa ese sistema para los acentos
+    const latin1Content = nodeBuffer.toString('latin1');
+    const isHtml = latin1Content.includes('<html') || latin1Content.includes('<table');
 
-    // 1. Detectar si es un "Falso Word" (es un HTML de ScriptCase/Excel)
-    if (rawContent.includes('<html') || rawContent.includes('<table')) {
-      // Es un HTML. Limpiamos las etiquetas para quedarnos con el texto puro.
-      const text = rawContent
-        .replace(/<style([\s\S]*?)<\/style>/gi, '') // Sacar CSS
-        .replace(/<script([\s\S]*?)<\/script>/gi, '') // Sacar JS
-        .replace(/<\/?[^>]+(>|$)/g, "\n") // Reemplazar etiquetas por saltos de linea
+    if (isHtml) {
+      // Limpieza profunda de HTML para evitar símbolos raros y basura
+      let text = latin1Content
+        .replace(/<style([\s\S]*?)<\/style>/gi, '') 
+        .replace(/<script([\s\S]*?)<\/script>/gi, '')
+        .replace(/<title>([\s\S]*?)<\/title>/gi, '')
+        // Reemplazar celdas y filas por saltos de línea para mantener estructura
+        .replace(/<\/tr>/gi, '\n')
+        .replace(/<\/td>/gi, '\n')
+        .replace(/<br\s*[\/]?>/gi, '\n')
+        // Quitar el resto de etiquetas
+        .replace(/<\/?[^>]+(>|$)/g, "") 
+        // Decodificar entidades comunes manualmente si quedaran
         .replace(/&nbsp;/g, ' ')
-        .replace(/\n\s*\n/g, '\n') // Quitar saltos de linea vacios
+        .replace(/&aacute;/g, 'á').replace(/&eacute;/g, 'é').replace(/&iacute;/g, 'í').replace(/&oacute;/g, 'ó').replace(/&uacute;/g, 'ú')
+        .replace(/&Aacute;/g, 'Á').replace(/&Eacute;/g, 'É').replace(/&Iacute;/g, 'Í').replace(/&Oacute;/g, 'Ó').replace(/&Uacute;/g, 'Ú')
+        .replace(/&ntilde;/g, 'ñ').replace(/&Ntilde;/g, 'Ñ')
+        .replace(/&iquest;/g, '¿').replace(/&iexcl;/g, '¡')
+        .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
         .trim();
+
+      // Normalizar saltos de línea múltiples
+      text = text.split('\n').map(line => line.trim()).filter(line => line.length > 0).join('\n');
       
       return NextResponse.json({ text });
     }
 
-    // 2. Si no es HTML, intentar extraer como Word binario (.doc / .docx)
+    // Si no es HTML, procedemos con WordExtractor (para .doc/.docx binarios reales)
     tempPath = path.join(os.tmpdir(), `upload_${Date.now()}.doc`);
-    await fs.writeFile(tempPath, buffer);
+    await fs.writeFile(tempPath, nodeBuffer);
 
     try {
       const extractor = new WordExtractor();
@@ -42,8 +60,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ text });
     } catch (execError: any) {
       await fs.unlink(tempPath).catch(() => {});
-      // Si falla word-extractor, intentamos devolver el buffer como texto por las dudas
-      return NextResponse.json({ text: buffer.toString('utf-8').substring(0, 10000) });
+      return NextResponse.json({ text: nodeBuffer.toString('utf-8').substring(0, 10000) });
     }
   } catch (error) {
     if (tempPath) await fs.unlink(tempPath).catch(() => {});
