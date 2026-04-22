@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E40 RutiBot</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1818a8;--s1:#1e1eb2;--s2:#2424bc;--s3:#2c2cc6;
+  --bdr:rgba(255,255,255,.11);--bdr2:rgba(255,255,255,.2);
+  --G:#7ccc1e;--tx:#fff;--mu:rgba(255,255,255,.45);--mu2:rgba(255,255,255,.68);
+  --red:#ff5c5c;--amber:#f9a825;--purple:#a78bfa;--cyan:#4cc9f0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;min-height:100vh;font-size:14px;}
+header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.8rem;background:rgba(0,0,30,.35);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:200;backdrop-filter:blur(10px);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:5px;}.logo b{color:var(--G);}
+.wave{display:flex;align-items:center;gap:3px;height:18px;}
+.wb{width:3px;border-radius:2px;background:var(--G);animation:wv 1.1s ease infinite;}
+.wb:nth-child(1){height:30%;animation-delay:.0s}.wb:nth-child(2){height:75%;animation-delay:.1s}
+.wb:nth-child(3){height:100%;animation-delay:.2s}.wb:nth-child(4){height:55%;animation-delay:.3s}
+.wb:nth-child(5){height:80%;animation-delay:.15s}.wb:nth-child(6){height:40%;animation-delay:.05s}
+ @keyframes wv{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.28)}}
+#pb{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.8rem;background:rgba(0,0,20,.25);border-bottom:1px solid var(--bdr);overflow-x:auto;}
+.pc{display:flex;align-items:center;gap:.45rem;padding:.35rem .85rem;border-radius:20px;font-size:.78rem;font-weight:500;cursor:pointer;border:1px solid var(--bdr2);background:transparent;color:var(--mu2);transition:all .18s;white-space:nowrap;flex-shrink:0;}
+.pc.act{font-weight:700;}.pc:hover:not(.act){background:rgba(255,255,255,.08);color:#fff;}
+#bap{padding:.35rem .8rem;border-radius:20px;font-size:.75rem;border:1px dashed var(--bdr2);background:transparent;color:var(--mu);cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0;}
+#bap:hover{border-color:var(--G);color:var(--G);}
+nav{display:flex;padding:0 1.8rem;background:rgba(0,0,20,.2);border-bottom:1px solid var(--bdr);overflow-x:auto;}
+.ntab{padding:.7rem 1.1rem;font-size:.8rem;font-weight:500;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;margin-bottom:-1px;display:flex;align-items:center;gap:.4rem;}
+.ntab.act{color:var(--G);border-bottom-color:var(--G);}.ntab:hover:not(.act){color:#fff;}
+.nbdg{background:var(--G);color:#1818a8;border-radius:10px;font-size:.56rem;padding:1px 5px;font-family:'DM Mono',monospace;font-weight:700;}
+.pg{display:none;padding:1.8rem;max-width:1200px;margin:0 auto;}.pg.act{display:block;}
+.pgt{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--mu2);margin-bottom:1.4rem;display:flex;align-items:center;gap:.8rem;}
+.pgt::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+ @media(max-width:800px){.two,.r3,.r2{grid-template-columns:1fr;}}
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+.ch{padding:.82rem 1.1rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.ct{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;}.cb{padding:1.1rem;}
+.fg{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.8rem;}
+label{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);}
+input,select,textarea{background:var(--s2);border:1px solid var(--bdr);border-radius:7px;padding:.58rem .82rem;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.83rem;outline:none;transition:border-color .18s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--G);}
+textarea{resize:vertical;min-height:80px;}select option{background:#2424bc;}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.2rem;background:var(--G);border:none;border-radius:9px;color:#1818a8;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .18s;width:100%;}
+.gbtn:hover{box-shadow:0 5px 20px rgba(124,204,30,.35);transform:translateY(-1px);}.gbtn:active{transform:translateY(0);}.gbtn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.sbtn{padding:.48rem .88rem;background:var(--s2);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.76rem;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.sbtn:hover{border-color:var(--G);color:var(--G);}
+.obtn{padding:.48rem .88rem;background:transparent;border:1px solid var(--G);border-radius:7px;color:var(--G);font-family:'DM Sans',sans-serif;font-size:.76rem;cursor:pointer;transition:all .15s;}
+.obtn:hover{background:var(--G);color:#1818a8;}
+.lsc{display:flex;flex-direction:column;gap:.4rem;max-height:340px;overflow-y:auto;padding-right:3px;}
+.lsc::-webkit-scrollbar{width:3px;}.lsc::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+.li{display:flex;align-items:flex-start;gap:.65rem;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:.55rem .8rem;}
+.li:hover{border-color:var(--bdr2);}.lb{flex:1;min-width:0;}
+.lm{font-size:.83rem;font-weight:500;margin-bottom:.15rem;}
+.ls2{font-size:.7rem;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lt{font-size:.72rem;color:var(--mu2);margin-top:.2rem;font-style:italic;line-height:1.4;}
+.rb{background:none;border:none;color:var(--mu);cursor:pointer;font-size:.8rem;padding:0 .15rem;flex-shrink:0;}.rb:hover{color:var(--red);}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--mu);font-size:.8rem;line-height:1.9;}
+.cr{display:flex;gap:.7rem;margin-bottom:1rem;}
+.cv{background:rgba(0,0,0,.2);border:1px solid var(--bdr);border-radius:9px;padding:.65rem .9rem;flex:1;text-align:center;}
+.cvn{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1;}
+.cvl{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;margin-top:.18rem;}
+.nl{display:flex;flex-direction:column;gap:.65rem;max-height:480px;overflow-y:auto;padding-right:3px;}
+.ni{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:.85rem .95rem;}
+.nibdg{font-family:'DM Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:10px;background:rgba(124,204,30,.12);border:1px solid rgba(124,204,30,.25);color:var(--G);margin-bottom:.55rem;display:inline-block;}
+.nitx{font-size:.81rem;line-height:1.65;color:var(--mu2);}
+.niact{display:flex;gap:.45rem;margin-top:.65rem;}
+.nibtn{padding:3px 8px;border-radius:5px;font-size:.68rem;background:var(--s3);border:1px solid var(--bdr2);color:var(--mu2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.nibtn:hover{border-color:var(--G);color:var(--G);}
+.spv{background:var(--s2);border:1px solid var(--bdr);border-radius:9px;padding:1rem;}
+.spvt{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:.7rem;}
+.brow{display:flex;align-items:center;gap:.6rem;padding:.38rem 0;border-bottom:1px solid var(--bdr);}
+.brow:last-of-type{border-bottom:none;}
+.btime{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--mu);width:42px;flex-shrink:0;}
+.bbars{flex:1;display:flex;gap:2px;height:7px;}.bseg{border-radius:2px;min-width:2px;}
+.blbl{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--mu);width:60px;text-align:right;flex-shrink:0;}
+.sti{display:flex;align-items:center;gap:.65rem;padding:.6rem .9rem;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:.79rem;color:var(--mu);margin-bottom:.45rem;}
+.sti.ok{background:rgba(124,204,30,.06);border-color:rgba(124,204,30,.2);color:var(--G);}
+.sti.warn{background:rgba(249,168,37,.06);border-color:rgba(249,168,37,.2);color:var(--amber);}
+.sdot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.sti.ok .sdot{animation:pulse 1.5s infinite;}
+ @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+#rt{width:100%;border-collapse:collapse;}
+#rt th{padding:.6rem .9rem;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);background:var(--s2);border-bottom:1px solid var(--bdr);text-align:left;}
+#rt td{padding:.55rem .9rem;font-size:.8rem;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+#rt tr:hover td{background:rgba(255,255,255,.03);}
+#rt td[contenteditable]{cursor:text;outline:none;}
+#rt td[contenteditable]:focus{background:rgba(124,204,30,.07);border-radius:4px;}
+.tpill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:12px;font-size:.68rem;font-weight:500;white-space:nowrap;}
+.t-m{background:rgba(76,201,240,.12);color:var(--cyan);border:1px solid rgba(76,201,240,.22);}
+.t-me{background:rgba(124,204,30,.12);color:var(--G);border:1px solid rgba(124,204,30,.22);}
+.t-n{background:rgba(249,168,37,.12);color:var(--amber);border:1px solid rgba(249,168,37,.22);}
+.t-t{background:rgba(255,92,92,.12);color:var(--red);border:1px solid rgba(255,92,92,.22);}
+.delr{background:none;border:none;color:var(--mu);cursor:pointer;font-size:.78rem;padding:0 .2rem;}.delr:hover{color:var(--red);}
+.arb{display:flex;gap:.5rem;padding:.6rem .9rem;background:var(--s2);border-top:1px solid var(--bdr);flex-wrap:wrap;}
+.spov{display:none;position:fixed;inset:0;background:rgba(10,10,80,.88);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:.9rem;}
+.spov.on{display:flex;}
+.spnr{width:40px;height:40px;border:3px solid var(--bdr2);border-top-color:var(--G);border-radius:50%;animation:sp .7s linear infinite;}
+ @keyframes sp{to{transform:rotate(360deg)}}
+.spmsg{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--mu);letter-spacing:2px;animation:blink 1.2s ease infinite;}
+ @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,50,.75);z-index:500;align-items:center;justify-content:center;}
+.mbg.on{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--bdr2);border-radius:14px;padding:1.5rem;width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal h3{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;margin-bottom:1.2rem;}
+.mact{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.2rem;}
+.div{height:1px;background:var(--bdr);margin:1rem 0;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:4px;}
+.ibox{background:rgba(124,204,30,.07);border:1px solid rgba(124,204,30,.2);border-radius:8px;padding:.75rem 1rem;font-size:.78rem;color:var(--mu2);line-height:1.6;margin-bottom:.9rem;}
+.dz{border:2px dashed rgba(255,255,255,.2);border-radius:12px;padding:1.8rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);}
+.dz:hover,.dz.drag{border-color:var(--G);background:rgba(124,204,30,.06);}
+.prok{background:rgba(124,204,30,.08);border:1px solid rgba(124,204,30,.22);border-radius:8px;padding:.75rem 1rem;font-size:.76rem;color:var(--mu2);line-height:1.7;margin-top:.8rem;}
+.prwarn{background:rgba(249,168,37,.08);border:1px solid rgba(249,168,37,.22);border-radius:8px;padding:.75rem 1rem;font-size:.76rem;color:var(--mu2);margin-top:.8rem;}
+</style>
+</head>
+<body>
+
+<!-- SPINNER -->
+<div class="spov" id="spov"><div class="spnr"></div><div class="spmsg" id="spmsg">PROCESANDO...</div></div>
+
+<!-- MODAL NUEVO PROGRAMA -->
+<div class="mbg" id="mprog">
+  <div class="modal">
+    <h3>Nuevo Programa</h3>
+    <div class="fg"><label>Nombre del programa</label><input id="npn" placeholder="Ej: El Despertador, La Tarde..."></div>
+    <div class="r2">
+      <div class="fg"><label>Hora inicio</label><input type="time" id="npi" value="07:00"></div>
+      <div class="fg"><label>Hora fin</label><input type="time" id="npf" value="12:00"></div>
+    </div>
+    <div class="fg"><label>Conductor/a</label><input id="npc" placeholder="Nombre del conductor"></div>
+    <div class="fg"><label>Productor/a</label><input id="npp" placeholder="Nombre del productor"></div>
+    <div class="fg"><label>Color identificador</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;" id="copts">
+        <div class="co" data-c="#7ccc1e" style="width:26px;height:26px;border-radius:50%;background:#7ccc1e;cursor:pointer;border:2px solid #fff;"></div>
+        <div class="co" data-c="#4cc9f0" style="width:26px;height:26px;border-radius:50%;background:#4cc9f0;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="co" data-c="#f9a825" style="width:26px;height:26px;border-radius:50%;background:#f9a825;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="co" data-c="#ff5c5c" style="width:26px;height:26px;border-radius:50%;background:#ff5c5c;cursor:pointer;border:2px solid transparent;"></div>
+        <div class="co" data-c="#a78bfa" style="width:26px;height:26px;border-radius:50%;background:#a78bfa;cursor:pointer;border:2px solid transparent;"></div>
+      </div>
+    </div>
+    <div class="mact">
+      <button class="sbtn" onclick="closeM()">Cancelar</button>
+      <button class="gbtn" style="width:auto;padding:.6rem 1.4rem;" onclick="saveP()">Crear Programa</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">E<b>4</b>0 <span style="font-size:1rem;letter-spacing:2px;color:var(--G);font-family:'Bebas Neue',sans-serif;">RutiBot</span></div>
+  <div style="display:flex;align-items:center;gap:1.1rem;">
+    <div class="wave"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div>
+    <span style="font-family:'DM Mono',monospace;font-size:.63rem;color:var(--mu);letter-spacing:1.5px;" id="hdate"></span>
+  </div>
+</header>
+
+<div id="pb"><button id="bap" onclick="openM()">+ Nuevo programa</button></div>
+
+<nav>
+  <div class="ntab act" onclick="goPg('menciones',this)">📢 Menciones <span class="nbdg" id="bdgm">0</span></div>
+  <div class="ntab" onclick="goPg('artistas',this)">📰 Noticias <span class="nbdg" id="bdga" style="background:var(--purple);color:#fff;">0</span></div>
+  <div class="ntab" onclick="goPg('estructura',this)">⚙️ Estructura</div>
+  <div class="ntab" onclick="goPg('generar',this)">⚡ Generar</div>
+</nav>
+
+<!-- PAGE MENCIONES -->
+<div class="pg act" id="pg-menciones">
+  <div class="pgt">Menciones del Programa</div>
+  <div class="ibox">Las menciones se guardan por programa y se reutilizan cada dia. Importalas desde archivo o cargalas manualmente.</div>
+
+  <!-- IMPORT -->
+  <div class="card">
+    <div class="ch">
+      <span class="ct" style="color:var(--G);">📂 Importar desde Archivo</span>
+      <span style="font-family:'DM Mono',monospace;font-size:.65rem;color:var(--mu);">PDF / DOC / Excel / CSV / TXT</span>
+    </div>
+    <div class="cb">
+      <div class="two" style="gap:1rem;align-items:start;">
+        <div>
+          <div class="dz" id="dz" onclick="document.getElementById('impf').click()"
+            ondragover="dzOn(event)" ondragleave="dzOff()" ondrop="dzDrop(event)">
+            <input type="file" id="impf" accept=".pdf,.xlsx,.xls,.csv,.txt,.doc,.docx" style="display:none;" onchange="impFile(this)">
+            <div style="font-size:2rem;margin-bottom:.5rem;">📄</div>
+            <div style="font-size:.9rem;font-weight:600;margin-bottom:.3rem;">Arrastrar o hacer clic</div>
+            <div style="font-size:.72rem;color:var(--mu);font-family:'DM Mono',monospace;">PDF · DOC · XLSX · XLS · CSV · TXT</div>
+          </div>
+          <div id="impprev" style="display:none;margin-top:.7rem;background:rgba(124,204,30,.07);border:1px solid rgba(124,204,30,.2);border-radius:8px;padding:.7rem 1rem;">
+            <div style="display:flex;align-items:center;gap:.7rem;">
+              <div style="flex:1;min-width:0;">
+                <div id="impnm" style="font-family:'DM Mono',monospace;font-size:.73rem;color:var(--G);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                <div id="impsz" style="font-size:.65rem;color:var(--mu);margin-top:.1rem;"></div>
+              </div>
+              <button class="sbtn" onclick="clrImp()" style="border-color:var(--red);color:var(--red);flex-shrink:0;">Quitar</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="fg">
+            <label>Texto extraido del archivo</label>
+            <textarea id="imptxt" style="min-height:140px;font-size:.72rem;font-family:'DM Mono',monospace;line-height:1.5;" placeholder="El contenido del archivo aparecera aca automaticamente. Tambien podes pegarlo manualmente..."></textarea>
+          </div>
+          <button class="gbtn" onclick="parseMen()">🤖 Detectar menciones con IA</button>
+          <div id="parseres" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two" style="align-items:start;">
+    <!-- FORM MANUAL -->
+    <div class="card">
+      <div class="ch"><span class="ct">➕ Agregar Manualmente</span></div>
+      <div class="cb">
+        <div class="fg"><label>Cliente / Anunciante</label><input id="mc" placeholder="Ej: Farmacia El Sol"></div>
+        <div class="r2">
+          <div class="fg"><label>Tipo</label>
+            <select id="mt">
+              <option>Mencion Live</option><option>Spot Grabado</option>
+              <option>Auspicio de Bloque</option><option>Tanda</option>
+            </select>
+          </div>
+          <div class="fg"><label>Veces por dia</label><input type="number" id="mn" placeholder="4" min="1" max="50"></div>
+        </div>
+        <div class="fg"><label>Horario preferido</label>
+          <select id="mh">
+            <option value="libre">Cualquier bloque</option>
+            <option value="manana">Solo manana (primeros bloques)</option>
+            <option value="tarde">Solo tarde (ultimos bloques)</option>
+            <option value="primero">Siempre primer bloque</option>
+            <option value="ultimo">Siempre ultimo bloque</option>
+          </select>
+        </div>
+        <div class="fg"><label>Texto fijo de la mencion</label>
+          <textarea id="mx" placeholder="Texto que lee la locutora al aire..."></textarea>
+        </div>
+        <button class="gbtn" onclick="addM()">+ Agregar</button>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div class="card" style="position:sticky;top:110px;">
+      <div class="ch">
+        <span class="ct">Lista de Menciones</span>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <span id="mtot" style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--mu);">0 items</span>
+          <button class="sbtn" onclick="clrAllM()" style="font-size:.7rem;padding:3px 8px;border-color:var(--red);color:var(--red);">🗑️ Limpiar todo</button>
+        </div>
+      </div>
+      <div class="cb">
+        <div class="cr">
+          <div class="cv"><div class="cvn" id="ccli" style="color:var(--G);">0</div><div class="cvl">Clientes</div></div>
+          <div class="cv"><div class="cvn" id="ctot" style="color:var(--amber);">0</div><div class="cvl">Menciones/dia</div></div>
+          <div class="cv"><div class="cvn" id="cxb" style="color:var(--cyan);">--</div><div class="cvl">Prom/bloque</div></div>
+        </div>
+        <div class="lsc" id="mlist"><div class="empty">Sin menciones cargadas.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE ARTISTAS -->
+<div class="pg" id="pg-artistas">
+  <div class="pgt">Noticias con IA</div>
+  <div class="two" style="align-items:start;">
+
+    <!-- COLUMNA IZQUIERDA -->
+    <div>
+      <!-- ARTISTAS -->
+      <div class="card">
+        <div class="ch">
+          <span class="ct" style="color:var(--purple);">🎤 Artistas y Famosos</span>
+        </div>
+        <div class="cb">
+          <div style="display:flex;gap:.6rem;margin-bottom:.4rem;">
+            <input id="ain" placeholder="Ej: Duki, Emilia..." onkeydown="if(event.key==='Enter')addA()" style="flex:1;">
+            <button class="sbtn" onclick="addA()">+</button>
+          </div>
+          <div class="lsc" id="alist" style="max-height:120px;margin-bottom:.6rem;"><div class="empty">Sin artistas</div></div>
+          <button class="gbtn" onclick="genSpecific('artists')" style="padding:.5rem;font-size:.75rem;">🤖 Buscar noticias de Artistas</button>
+        </div>
+      </div>
+
+      <!-- TEMAS -->
+      <div class="card">
+        <div class="ch">
+          <span class="ct" style="color:var(--cyan);">💡 Nichos y Temas Extra</span>
+        </div>
+        <div class="cb">
+          <div style="display:flex;gap:.6rem;margin-bottom:.4rem;">
+            <input id="tin" placeholder="Ej: Tecnología, Cine, Deportes..." onkeydown="if(event.key==='Enter')addT()" style="flex:1;">
+            <button class="sbtn" onclick="addT()">+</button>
+          </div>
+          <div class="lsc" id="tlist" style="max-height:120px;margin-bottom:.6rem;"><div class="empty">Sin temas</div></div>
+          <button class="gbtn" onclick="genSpecific('temas')" style="padding:.5rem;font-size:.75rem;background:rgba(76,201,240,.2);color:var(--cyan);">🤖 Buscar noticias de Temas</button>
+        </div>
+      </div>
+
+      <!-- EFEMERIDES Y CONTEXTO -->
+      <div class="card">
+        <div class="ch">
+          <span class="ct" style="color:var(--G);">📅 Efemérides y Contexto del Día</span>
+        </div>
+        <div class="cb">
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--tx);font-size:.85rem;text-transform:none;letter-spacing:0;margin-bottom:.8rem;">
+            <input type="checkbox" id="chk-efemerides" style="width:auto;accent-color:var(--G);" onchange="svEfe()"> Incluir efemérides de hoy
+          </label>
+          <div class="fg">
+            <label>Novedades o datos sueltos (Contexto local)</label>
+            <textarea id="ctx-dia" style="min-height:50px;" placeholder="Ej: Hoy sale el album de Bizarrap..."></textarea>
+          </div>
+          <div class="fg">
+            <label>Temas que suenan hoy en la radio</label>
+            <textarea id="ctx-temas" style="min-height:50px;" placeholder="Ej: Shakira - Bzrp Session 53..."></textarea>
+          </div>
+          <button class="gbtn" onclick="genSpecific('contexto')" style="padding:.5rem;font-size:.75rem;background:rgba(124,204,30,.2);color:var(--G);">🤖 Generar desde Contexto</button>
+        </div>
+      </div>
+
+      <!-- FUENTES -->
+      <div class="card">
+        <div class="ch">
+          <span class="ct" style="color:var(--amber);">🔗 Extraer de Fuentes Específicas</span>
+        </div>
+        <div class="cb">
+          <div style="display:flex;gap:.6rem;margin-bottom:.4rem;">
+            <input id="fin" placeholder="URL, @twitter, IG..." onkeydown="if(event.key==='Enter')addF()" style="flex:1;">
+            <button class="sbtn" onclick="addF()">+</button>
+          </div>
+          <div class="lsc" id="flist" style="max-height:120px;margin-bottom:.6rem;"><div class="empty">Sin fuentes</div></div>
+          <button class="gbtn" onclick="genSpecific('fuentes')" style="padding:.5rem;font-size:.75rem;background:rgba(249,168,37,.2);color:var(--amber);">🤖 Extraer info de estas Fuentes</button>
+        </div>
+      </div>
+
+      <!-- CONFIGURACION -->
+      <div class="card">
+        <div class="ch">
+          <span class="ct">⚙️ Configuracion de Redacción</span>
+          <button class="sbtn" id="btn-adv" onclick="toggleAdv()" style="font-size:.7rem;">+ Ver opciones</button>
+        </div>
+        <div class="cb">
+          <div class="r2">
+            <div class="fg">
+              <label>Estilo de redaccion</label>
+              <select id="estilo">
+                <option value="radio">Radio — Cercano y dinamico</option>
+                <option value="formal">Formal informativo</option>
+                <option value="joven">Joven y descontracturado</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Duracion por defecto</label>
+              <select id="durn">
+                <option value="corta">Corta (~20 seg)</option>
+                <option value="media" selected>Media (~45 seg)</option>
+                <option value="larga">Larga (~90 seg)</option>
+              </select>
+            </div>
+          </div>
+          <div class="r2">
+            <div class="fg">
+              <label>Formato de salida</label>
+              <select id="formato">
+                <option value="leer">Texto para leer directo</option>
+                <option value="guia">Guia para improvisar</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Cobertura geografica</label>
+              <select id="cobertura">
+                <option value="arg">Solo Argentina</option>
+                <option value="latam" selected>Argentina + Latinoamerica</option>
+                <option value="int">Internacional</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="adv-panel" style="display:none;">
+            <div class="div"></div>
+            <div class="fg" style="margin-top:.4rem;">
+              <label>Frases tipicas de E40 que la IA debe usar</label>
+              <textarea id="muletillas" style="min-height:62px;" placeholder="Ej: 'aca en E40', 'te lo contamos primero', 'para los que escuchan E40'..."></textarea>
+            </div>
+            <div class="fg">
+              <label>Ejemplo de noticia ya redactada (modelo de estilo)</label>
+              <textarea id="ejstilo" style="min-height:80px;" placeholder="Pega una noticia real que ya hayan usado. La IA va a copiar exactamente ese tono y estructura..."></textarea>
+            </div>
+            <div style="background:rgba(124,204,30,.06);border:1px solid rgba(124,204,30,.18);border-radius:8px;padding:.7rem .9rem;margin-top:.5rem;">
+              <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--G);margin-bottom:.5rem;">Configuracion Global de E40</div>
+              <div style="font-size:.75rem;color:var(--mu2);margin-bottom:.7rem;line-height:1.5;">Este estilo aplica a TODOS los programas de la radio. Se guarda una sola vez y no tenes que cargarlo de nuevo.</div>
+              <button class="gbtn" onclick="saveNConfig()" style="padding:.6rem 1rem;font-size:.78rem;">💾 Guardar configuracion global de E40</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--G); border:none;">
+        <button class="gbtn" id="bgen" onclick="genSpecific('all')" disabled style="background:var(--G); color:#1818a8; font-size:1.1rem; padding:1rem;">⚡ Buscar y Generar TODO con IA</button>
+      </div>
+
+    </div>
+    <!-- COLUMNA DERECHA: resultado -->
+    <div class="card" style="position:sticky;top:110px;">
+      <div class="ch">
+        <span class="ct" style="color:var(--G);">📰 Noticias Generadas</span>
+        <div style="display:flex;gap:.4rem;">
+          <button class="sbtn" id="brdh" onclick="randN()" disabled style="font-size:.72rem;">🔀 Orden</button>
+          <button class="sbtn" onclick="copyAllN()" id="bcopyall" style="display:none;font-size:.72rem;">📋 Copiar todo</button>
+          <button class="sbtn" onclick="clrAllN()" id="bclrn" style="display:none;font-size:.7rem;padding:3px 8px;border-color:var(--red);color:var(--red);">🗑️ Limpiar</button>
+        </div>
+      </div>
+      <div class="cb">
+        <div id="nstatus" style="display:none;margin-bottom:.8rem;"></div>
+        <div class="nl" id="nlist"><div class="empty">Las noticias apareceran aca.<br>Agrega artistas y hace clic en Generar.</div></div>
+        <div class="div"></div>
+        <button class="sbtn" id="brd" onclick="randN()" disabled style="width:100%;">🔀 Randomizar orden</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PAGE ESTRUCTURA -->
+<div class="pg" id="pg-estructura">
+  <div class="pgt">Estructura del Programa</div>
+  <div class="two" style="align-items:start;">
+    <div class="card">
+      <div class="ch"><span class="ct">⏱ Configuracion de Bloques</span></div>
+      <div class="cb">
+        <div class="r2">
+          <div class="fg"><label>Hora inicio</label><input type="time" id="hi" value="07:00" oninput="drwS()"></div>
+          <div class="fg"><label>Hora fin</label><input type="time" id="hf" value="12:00" oninput="drwS()"></div>
+        </div>
+        <div class="fg">
+          <label>Horarios de entrada de bloques</label>
+          <input type="text" id="blq_hrs" value="07:00, 08:00, 09:00, 10:00, 11:00" placeholder="Ej: 07:00, 08:00, 09:00" oninput="drwS()">
+          <div style="font-size:.68rem;color:var(--mu);margin-top:.3rem;font-family:'DM Mono',monospace;">La cantidad de horarios que ingreses define la cantidad de bloques.</div>
+        </div>
+        <div class="fg"><label>Duracion tanda (min)</label><input type="number" id="dt" value="3" min="1" max="15"></div>
+        <div class="div"></div>
+        <div class="r2">
+          <div class="fg"><label>Menciones por bloque (max)</label><input type="number" id="mxb" value="3" min="0" max="20" oninput="drwS()"></div>
+          <div class="fg"><label>Musica por bloque (min)</label><input type="number" id="mmb" value="40" min="5" max="120" oninput="drwS()"></div>
+        </div>
+        <div class="div"></div>
+        <div class="fg">
+          <label>Noticias del programa — cantidad total</label>
+          <input type="number" id="ntot" value="3" min="0" max="20" oninput="drwS()" placeholder="Ej: 3 noticias en todo el programa">
+        </div>
+        <div class="fg">
+          <label>Bloques donde van las noticias (ej: 2,4 o 1-3)</label>
+          <input type="text" id="nblqs" value="2,4" placeholder="Ej: 2,4 — o rango: 2-4 — o: todos" oninput="drwS()">
+          <div style="font-size:.68rem;color:var(--mu);margin-top:.3rem;font-family:'DM Mono',monospace;">Escribi los numeros de bloque separados por coma, un rango (2-4), o "todos"</div>
+        </div>
+        <div class="ibox" style="margin-top:.3rem;">Las noticias se insertan UNA SOLA VEZ en los bloques que definas. Ninguna marca se repite en el mismo bloque.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct" style="color:var(--G);">👁 Vista Previa de Bloques</span></div>
+      <div class="cb">
+        <div class="spv">
+          <div class="spvt">BLOQUES DEL PROGRAMA</div>
+          <div id="sblocks"></div>
+          <div id="sleg" style="display:flex;gap:1rem;margin-top:.7rem;font-size:.6rem;font-family:'DM Mono',monospace;color:var(--mu);flex-wrap:wrap;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE GENERAR -->
+<div class="pg" id="pg-generar">
+  <div class="pgt">Generar Rutina del Dia</div>
+  <div id="slist" style="margin-bottom:1.3rem;"></div>
+  <div style="display:flex;gap:.7rem;margin-bottom:2rem;flex-wrap:wrap;">
+    <button class="gbtn" style="max-width:260px;" onclick="genF()">⚡ Generar Rutina</button>
+    <button class="sbtn" onclick="expPDF()" id="bpdf" style="display:none;">📄 Descargar PDF</button>
+    <button class="sbtn" onclick="expTXT()" id="btxt" style="display:none;">⬇ Exportar TXT</button>
+  </div>
+  <div id="rwrap" style="display:none;">
+    <div class="card">
+      <div class="ch">
+        <span class="ct" style="color:var(--G);">Rutina — <span id="rpn">--</span></span>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <span style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--mu);">Clic en celda para editar</span>
+          <button class="obtn" onclick="addRow()">+ Fila</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="rt">
+          <thead><tr><th style="width:68px;">Hora</th><th style="width:118px;">Tipo</th><th>Contenido</th><th style="width:34px;"></th></tr></thead>
+          <tbody id="rb"></tbody>
+        </table>
+        <div class="arb">
+          <select id="nrt" style="width:130px;">
+            <option value="m">Musica</option><option value="n">Noticia</option>
+            <option value="me">Mencion</option><option value="t">Tanda</option>
+          </select>
+          <input id="nrh" type="time" style="width:100px;">
+          <input id="nrc" placeholder="Contenido..." style="flex:1;min-width:120px;">
+          <button class="sbtn" onclick="addRow()">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ STATE ═══
+// Migrate from old key if needed
+(function(){
+  const old = localStorage.getItem('e40_prog') || localStorage.getItem('e40_programas');
+  if (old && !localStorage.getItem('e40v3')) { localStorage.setItem('e40v3', old); }
+})();
+let progs = (function(){
+  try { return JSON.parse(localStorage.getItem('e40v3') || '[]'); } catch(e) { return []; }
+})();
+let ap = null;
+const P = () => ap !== null ? progs[ap] : null;
+const sv = () => {
+  try { localStorage.setItem('e40v3', JSON.stringify(progs)); } catch(e) { console.warn('Storage full'); }
+};
+
+// ═══ INIT ═══
+document.getElementById('hdate').textContent = new Date().toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+document.querySelectorAll('.co').forEach(el => el.onclick = () => {
+  document.querySelectorAll('.co').forEach(o => { o.style.border = '2px solid transparent'; delete o.dataset.sel; });
+  el.style.border = '2px solid #fff'; el.dataset.sel = '1';
+});
+document.querySelector('.co').dataset.sel = '1';
+rPB(); if (progs.length) { ap = 0; ldP(); } drwS(); loadNConfig();
+
+// ═══ PROGRAMAS ═══
+function openM() { document.getElementById('mprog').classList.add('on'); }
+function closeM() { document.getElementById('mprog').classList.remove('on'); }
+function saveP() {
+  const n = document.getElementById('npn').value.trim(); if (!n) return;
+  const c = document.querySelector('.co[data-sel="1"]')?.dataset.c || '#7ccc1e';
+  progs.push({ id: Date.now(), nombre: n, conductor: document.getElementById('npc').value.trim(),
+    productor: document.getElementById('npp').value.trim(),
+    ini: document.getElementById('npi').value, fin: document.getElementById('npf').value,
+    color: c, menciones: [], artists: [], temas: [], fuentes: [], efemerides: false, noticias: [], est: { blq_hrs:'07:00, 08:00, 09:00, 10:00, 11:00',dt:3,mxb:3,mmb:40,ntot:3,nblqs:'2,4' } });
+  sv(); ap = progs.length - 1; closeM(); rPB(); ldP();
+  document.getElementById('npn').value = ''; document.getElementById('npc').value = ''; document.getElementById('npp').value = '';
+}
+function rPB() {
+  const bar = document.getElementById('pb');
+  const chips = progs.map((p,i) => {
+    const a = ap === i;
+    return `<div class="pc ${a?'act':''}" onclick="swP(${i})" style="${a?`background:${p.color};border-color:${p.color};color:#1818a8;`:`border-color:${p.color}55;`}">
+      <div style="width:7px;height:7px;border-radius:50%;background:${p.color};flex-shrink:0;opacity:${a?.9:.5};"></div>
+      ${p.nombre}<span style="opacity:.5;font-size:.7rem;">${p.ini}-${p.fin}${p.productor ? ' | P: ' + p.productor : ''}</span>
+      ${progs.length>1?`<span onclick="event.stopPropagation();delP(${i})" style="opacity:.4;font-size:.7rem;cursor:pointer;margin-left:.1rem;">x</span>`:''}
+    </div>`;
+  }).join('');
+  bar.innerHTML = `<button id="bap" onclick="openM()">+ Nuevo programa</button>${chips}`;
+}
+function swP(i) { ap = i; rPB(); ldP(); }
+function delP(i) {
+  if (!confirm('Eliminar "' + progs[i].nombre + '"?')) return;
+  progs.splice(i, 1); ap = progs.length ? Math.max(0, Math.min(ap, progs.length-1)) : null;
+  sv(); rPB(); if (P()) ldP();
+}
+function ldP() {
+  const p = P(); if (!p) return;
+  document.getElementById('hi').value = p.ini || '07:00';
+  document.getElementById('hf').value = p.fin || '12:00';
+  const bhEl = document.getElementById('blq_hrs');
+  if (bhEl) bhEl.value = p.est?.blq_hrs || '07:00, 08:00, 09:00, 10:00, 11:00';
+  document.getElementById('dt').value = p.est?.dt || 3;
+  document.getElementById('mxb').value = p.est?.mxb || 3;
+  document.getElementById('mmb').value = p.est?.mmb || 40;
+  document.getElementById('ntot').value = p.est?.ntot || 3;
+  document.getElementById('nblqs').value = p.est?.nblqs || '2,4';
+  const Pobj = P(); if(Pobj && !Pobj.temas) Pobj.temas=[]; if(Pobj && !Pobj.fuentes) Pobj.fuentes=[]; document.getElementById('chk-efemerides').checked = Pobj?.efemerides || false; rM(); rA(); rT(); rF(); rN(); drwS(); loadNConfig();
+}
+function svE() {
+  const p = P(); if (!p) return;
+  p.ini = document.getElementById('hi').value; p.fin = document.getElementById('hf').value;
+  const bhEl = document.getElementById('blq_hrs');
+  const bh = bhEl ? bhEl.value : '07:00, 08:00, 09:00, 10:00, 11:00';
+  const nb = bh.split(',').filter(x => x.trim() !== '').length || 1;
+  p.est = { blq_hrs: bh, nb: nb, dt:+document.getElementById('dt').value||3,
+    mxb:+document.getElementById('mxb').value||3, mmb:+document.getElementById('mmb').value||40,
+    ntot:+document.getElementById('ntot').value||3, nblqs:document.getElementById('nblqs').value||'2,4' };
+  sv();
+}
+
+// ═══ NAVEGACION ═══
+function goPg(id, el) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('act'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('act'));
+  document.getElementById('pg-' + id).classList.add('act'); el.classList.add('act');
+  if (id === 'generar') bldSt(); if (id === 'estructura') svE();
+}
+
+// ═══ FILE IMPORT ═══
+function dzOn(e) { e.preventDefault(); document.getElementById('dz').classList.add('drag'); }
+function dzOff() { document.getElementById('dz').classList.remove('drag'); }
+function dzDrop(e) { e.preventDefault(); dzOff(); const f = e.dataTransfer.files[0]; if (f) procImp(f); }
+function impFile(inp) { const f = inp.files[0]; if (f) procImp(f); }
+function clrImp() {
+  document.getElementById('impprev').style.display = 'none';
+  document.getElementById('imptxt').value = '';
+  document.getElementById('parseres').style.display = 'none';
+  document.getElementById('impf').value = '';
+}
+function fmtSz(b) { return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'; }
+function ldSc(src) {
+  return new Promise((res,rej) => {
+    if (document.querySelector('script[src="'+src+'"]')) { res(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+function rdTxt(file) {
+  return new Promise((res,rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsText(file,'utf-8'); });
+}
+async function exPDF2(file) {
+  await ldSc('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await window.pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+  let txt = '';
+  for (let i = 1; i <= Math.min(pdf.numPages, 15); i++) {
+    const tc = await (await pdf.getPage(i)).getTextContent();
+    txt += tc.items.map(s => s.str).join(' ') + '\n';
+  }
+  return txt;
+}
+async function exXLS2(file) {
+  await ldSc('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  const wb = window.XLSX.read(await file.arrayBuffer(), {type:'array'});
+  return wb.SheetNames.map(n => '[Hoja: '+n+']\n'+window.XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n');
+}
+async function procImp(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  document.getElementById('impprev').style.display = 'block';
+  document.getElementById('impnm').textContent = file.name;
+  document.getElementById('impsz').textContent = fmtSz(file.size) + ' - ' + ext.toUpperCase();
+  document.getElementById('imptxt').value = 'Extrayendo texto del archivo...';
+  try {
+    let txt = '';
+    if (ext === 'doc' || ext === 'docx') {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/extract-doc', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.text) txt = data.text;
+      else throw new Error(data.error || 'Error extrayendo DOC');
+    }
+    else if (ext === 'pdf') txt = await exPDF2(file);
+    else if (['xlsx','xls'].includes(ext)) txt = await exXLS2(file);
+    else txt = await rdTxt(file);
+    document.getElementById('imptxt').value = txt.trim();
+  } catch(e) {
+    document.getElementById('imptxt').value = 'No se pudo extraer automaticamente. Pega el texto manualmente.';
+  }
+}
+async function parseMen() {
+  const texto = document.getElementById('imptxt').value.trim();
+  if (!texto) { alert('Subi un archivo o pega el texto primero.'); return; }
+  const p = P(); if (!p) { alert('Selecciona un programa primero.'); return; }
+  showSp('Detectando menciones...');
+  const resEl = document.getElementById('parseres'); resEl.style.display = 'none';
+  try {
+    const r = await fetch('/api/parse-mentions', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ text: texto })
+    });
+    const parsed = await r.json();
+    if (parsed.error) {
+      resEl.className = 'prwarn'; resEl.style.display = 'block';
+      resEl.innerHTML = parsed.error;
+      hideSp(); return;
+    }
+    const nv = parsed.menciones || [];
+    if (!nv.length) {
+      resEl.className = 'prwarn'; resEl.style.display = 'block';
+      resEl.innerHTML = 'No se encontraron menciones. Revisa el texto o agrega manualmente.';
+      hideSp(); return;
+    }
+    let added = 0;
+    let existing = 0;
+    nv.forEach(m => {
+      let ext = p.menciones.find(x => x.cli.toLowerCase() === m.cli.toLowerCase() && x.txt.toLowerCase() === (m.txt || '').toLowerCase());
+      if (ext) {
+          ext.cant += parseInt(m.cant) || 1;
+          existing++;
+      } else {
+        p.menciones.push({ cli:m.cli, tipo:m.tipo||'Mencion Live', cant:parseInt(m.cant)||1, horario:'libre', txt:m.txt||'' });
+        added++;
+      }
+    });
+    sv(); rM();
+    resEl.className = 'prok'; resEl.style.display = 'block';
+    resEl.innerHTML = 'Se detectaron <strong>' + nv.length + '</strong> menciones — <strong>' + added + '</strong> agregadas nuevas' +
+      (existing > 0 ? ' — <strong>' + existing + '</strong> actualizadas (se sumó cantidad)' : '') +
+      '<div style="margin-top:.5rem;display:flex;flex-wrap:wrap;gap:.4rem;">' +
+      nv.map(m => '<span style="background:rgba(124,204,30,.12);border:1px solid rgba(124,204,30,.25);border-radius:12px;padding:2px 9px;font-size:.68rem;color:var(--G);">' + m.cli + ' x' + m.cant + '</span>').join('') + '</div>';
+  } catch(e) {
+    resEl.className = 'prwarn'; resEl.style.display = 'block';
+    resEl.innerHTML = 'Error al procesar el archivo. Revisa el texto y vuelve a intentar.';
+  }
+  hideSp();
+}
+
+// ═══ MENCIONES ═══
+function addM() {
+  const p = P(); if (!p) { alert('Selecciona un programa primero'); return; }
+  const c = document.getElementById('mc').value.trim(); if (!c) return;
+  p.menciones.push({ cli:c, tipo:document.getElementById('mt').value, cant:+document.getElementById('mn').value||1,
+    horario:document.getElementById('mh').value, txt:document.getElementById('mx').value.trim() });
+  sv(); document.getElementById('mc').value=''; document.getElementById('mn').value=''; document.getElementById('mx').value=''; rM();
+}
+function rmM(i) { const p = P(); if (!p) return; p.menciones.splice(i,1); sv(); rM(); }
+function clrAllM() {
+  if (!confirm('¿Borrar todas las menciones y limpiar el texto importado?')) return;
+  const p = P(); if (p) { p.menciones = []; sv(); rM(); }
+  document.getElementById('imptxt').value = '';
+  document.getElementById('parseres').style.display = 'none';
+  document.getElementById('impf').value = '';
+  document.getElementById('impprev').style.display = 'none';
+}
+function rM() {
+  const p = P(); const el = document.getElementById('mlist');
+  if (!p || !p.menciones.length) { el.innerHTML = '<div class="empty">Sin menciones cargadas.</div>'; uMC(0,0); return; }
+  el.innerHTML = p.menciones.map((m,i) =>
+    `<div class="li"><div class="lb">
+      <div class="lm">📢 ${m.cli}</div>
+      <div class="ls2">${m.tipo} — ${m.cant}x/dia — ${m.horario}</div>
+      ${m.txt ? `<div class="lt">"${m.txt.substring(0,80)}${m.txt.length>80?'...':''}"</div>` : ''}
+    </div><button class="rb" onclick="rmM(${i})">✕</button></div>`).join('');
+  const tot = p.menciones.reduce((a,m) => a+m.cant, 0);
+  uMC(p.menciones.length, tot); document.getElementById('bdgm').textContent = p.menciones.length;
+}
+function uMC(c, t) {
+  const b = +document.getElementById('nb')?.value || 5;
+  document.getElementById('ccli').textContent = c; document.getElementById('ctot').textContent = t;
+  document.getElementById('cxb').textContent = c ? (t/b).toFixed(1) : '--';
+  document.getElementById('mtot').textContent = c + ' items';
+}
+
+// ═══ TEMAS, ARTISTAS Y FUENTES ═══
+function svEfe() { const p=P(); if(p){ p.efemerides=document.getElementById('chk-efemerides').checked; sv(); checkGen(); } }
+
+function addA() {
+  const p = P(); if (!p) return;
+  if (!p.artists) p.artists = [];
+  const v = document.getElementById('ain').value.trim(); if (!v || p.artists.includes(v)) return;
+  p.artists.push(v); sv(); document.getElementById('ain').value = ''; rA();
+}
+function rmA(i) { const p = P(); if (!p) return; p.artists.splice(i,1); sv(); rA(); }
+function rA() {
+  const p = P(); const el = document.getElementById('alist');
+  const arr = p?.artists || [];
+  document.getElementById('bdga').textContent = arr.length + (p?.temas?.length||0);
+  if (!arr.length) { el.innerHTML = '<div class="empty">Sin artistas</div>'; checkGen(); return; }
+  el.innerHTML = arr.map((a,i) => `<div class="li"><div class="lb"><div class="lm">🎤 ${a}</div></div><button class="rb" onclick="rmA(${i})">✕</button></div>`).join('');
+  checkGen();
+}
+
+function addT() {
+  const p = P(); if (!p) return;
+  if (!p.temas) p.temas = [];
+  const v = document.getElementById('tin').value.trim(); if (!v || p.temas.includes(v)) return;
+  p.temas.push(v); sv(); document.getElementById('tin').value = ''; rT();
+}
+function rmT(i) { const p = P(); if (!p) return; p.temas.splice(i,1); sv(); rT(); }
+function rT() {
+  const p = P(); const el = document.getElementById('tlist');
+  const arr = p?.temas || [];
+  document.getElementById('bdga').textContent = arr.length + (p?.artists?.length||0);
+  if (!arr.length) { el.innerHTML = '<div class="empty">Sin temas extra</div>'; checkGen(); return; }
+  el.innerHTML = arr.map((a,i) => `<div class="li"><div class="lb"><div class="lm">💡 ${a}</div></div><button class="rb" onclick="rmT(${i})">✕</button></div>`).join('');
+  checkGen();
+}
+
+function addF() {
+  const p = P(); if (!p) return;
+  if (!p.fuentes) p.fuentes = [];
+  const v = document.getElementById('fin').value.trim(); if (!v || p.fuentes.includes(v)) return;
+  p.fuentes.push(v); sv(); document.getElementById('fin').value = ''; rF();
+}
+function rmF(i) { const p = P(); if (!p) return; p.fuentes.splice(i,1); sv(); rF(); }
+function rF() {
+  const p = P(); const el = document.getElementById('flist');
+  const arr = p?.fuentes || [];
+  if (!arr.length) { el.innerHTML = '<div class="empty">La IA buscará libremente en la web si no ponés nada acá.</div>'; return; }
+  el.innerHTML = arr.map((a,i) => `<div class="li"><div class="lb"><div class="lm" style="font-size: .75rem; word-break: break-all;">🔗 ${a}</div></div><button class="rb" onclick="rmF(${i})">✕</button></div>`).join('');
+}
+
+function checkGen() {
+  const p = P();
+  const c = (p?.artists?.length || 0) + (p?.temas?.length || 0) + (p?.efemerides ? 1 : 0);
+  const btn = document.getElementById('bgen');
+  if (btn) btn.disabled = c === 0;
+}
+
+// ═══ NOTICIAS IA ═══
+
+function toggleAdv() {
+  const panel = document.getElementById('adv-panel');
+  const btn = document.getElementById('btn-adv');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '- Ocultar opciones' : '+ Ver opciones';
+}
+
+// Cargar config guardada del programa al mostrar la pagina
+function loadNConfig() {
+  // Load GLOBAL config — same for all programs
+  let c;
+  try { c = JSON.parse(localStorage.getItem('e40_nconfig') || 'null'); } catch(e) { return; }
+  if (!c) return;
+  if (c.estilo) document.getElementById('estilo').value = c.estilo;
+  if (c.durn) document.getElementById('durn').value = c.durn;
+  if (c.formato) document.getElementById('formato').value = c.formato;
+  if (c.cobertura) document.getElementById('cobertura').value = c.cobertura;
+  if (c.muletillas !== undefined) document.getElementById('muletillas').value = c.muletillas;
+  if (c.ejstilo !== undefined) document.getElementById('ejstilo').value = c.ejstilo;
+  if (c.chkLanz !== undefined) document.getElementById('chk-lanz').checked = c.chkLanz;
+  if (c.chkShows !== undefined) document.getElementById('chk-shows').checked = c.chkShows;
+  if (c.chkPremios !== undefined) document.getElementById('chk-premios').checked = c.chkPremios;
+  if (c.chkColabs !== undefined) document.getElementById('chk-colabs').checked = c.chkColabs;
+  if (c.chkDatos !== undefined) document.getElementById('chk-datos').checked = c.chkDatos;
+}
+
+function saveNConfig() {
+  const cfg = {
+    estilo: document.getElementById('estilo').value,
+    durn: document.getElementById('durn').value,
+    formato: document.getElementById('formato').value,
+    cobertura: document.getElementById('cobertura').value,
+    muletillas: document.getElementById('muletillas').value,
+    ejstilo: document.getElementById('ejstilo').value,
+    chkLanz: document.getElementById('chk-lanz').checked,
+    chkShows: document.getElementById('chk-shows').checked,
+    chkPremios: document.getElementById('chk-premios').checked,
+    chkColabs: document.getElementById('chk-colabs').checked,
+    chkDatos: document.getElementById('chk-datos').checked,
+  };
+  // Save GLOBALLY — shared across all programs
+  try { localStorage.setItem('e40_nconfig', JSON.stringify(cfg)); } catch(e) {}
+  // Visual feedback
+  const btns = document.querySelectorAll('[onclick="saveNConfig()"]');
+  btns.forEach(b => { const o=b.textContent; b.textContent='✓ Guardado globalmente'; b.style.color='var(--G)'; setTimeout(()=>{ b.textContent=o; b.style.color=''; },2500); });
+}
+
+function buildPrompt(p) {
+  const est = document.getElementById('estilo').value;
+  const dur = document.getElementById('durn').value;
+  const formato = document.getElementById('formato').value;
+  const cobertura = document.getElementById('cobertura').value;
+  const ctxDia = document.getElementById('ctx-dia').value.trim();
+  const ctxTemas = document.getElementById('ctx-temas').value.trim();
+  const muletillas = document.getElementById('muletillas').value.trim();
+  const ejstilo = document.getElementById('ejstilo').value.trim();
+  const chkLanz = document.getElementById('chk-lanz').checked;
+  const chkShows = document.getElementById('chk-shows').checked;
+  const chkPremios = document.getElementById('chk-premios').checked;
+  const chkColabs = document.getElementById('chk-colabs').checked;
+  const chkDatos = document.getElementById('chk-datos').checked;
+
+  const eM = {
+    radio: 'radial argentino, rioplatense, cercano y dinamico — habla directo al oyente con energia y ganchos',
+    formal: 'formal e informativo, claro y preciso, sin coloquialismos',
+    joven: 'joven, descontracturado, con onda, usando terminos actuales del ambiente musical'
+  };
+  const dM = {
+    corta: 'MUY CORTA: exactamente 2-3 oraciones (15-25 segundos al aire, 35-45 palabras). Va entre temas.',
+    media: 'MEDIA: exactamente 4-6 oraciones (40-50 segundos al aire, 70-90 palabras). Segmento propio.',
+    larga: 'LARGA: exactamente 8-12 oraciones (80-100 segundos al aire, 140-170 palabras). Bloque informativo.'
+  };
+  const cobM = {
+    arg: 'noticias que ocurrieron o tienen repercusion en ARGENTINA principalmente',
+    latam: 'noticias de Argentina y Latinoamerica, con foco en lo que le importa al oyente argentino',
+    int: 'noticias internacionales tambien, siempre con contexto para el oyente argentino'
+  };
+  const tiposPrior = [
+    chkLanz && 'lanzamientos de canciones/albums/videos/novedades discograficas',
+    chkShows && 'shows en vivo, giras, fechas de conciertos, entradas',
+    chkPremios && 'premios, nominaciones, reconocimientos',
+    chkColabs && 'colaboraciones con otros artistas',
+    chkDatos && 'datos curiosos, anecdotas, noticias del mundo personal del artista'
+  ].filter(Boolean);
+
+  const formatoInstr = formato === 'guia'
+    ? 'FORMATO GUIA PARA IMPROVISAR: NO escribas el texto completo. En cambio, dá 3-4 bullets con datos clave (nombres, fechas, cifras, frases impactantes) para que la locutora improvise. Empieza con "GUIA:" seguido de los bullets.'
+    : 'FORMATO LEER DIRECTO: escribi el texto completo listo para que la locutora lo lea al aire sin editar.';
+
+  let prompt = `Sos el redactor de noticias de E40, una radio argentina. Tu trabajo es buscar informacion REAL y RECIENTE en internet sobre los artistas en rotacion y convertirla en noticias para que la locutora las use al aire hoy.
+
+ARTISTAS EN ROTACION: ${p.artists.join(', ')}
+`;
+
+  if (ctxDia) prompt += `
+CONTEXTO DEL DIA (info que ya sabemos):
+${ctxDia}
+`;
+  if (ctxTemas) prompt += `
+TEMAS QUE SUENAN HOY EN E40:
+${ctxTemas}
+`;
+
+  prompt += `
+INSTRUCCIONES DE REDACCION:
+- Todo en ESPANOL rioplatense (vos, ustedes, che), sin excepcion
+- Estilo: ${eM[est] || eM.radio}
+- Extension: ${dM[dur] || dM.media}
+- Cobertura: ${cobM[cobertura] || cobM.latam}
+- Cada noticia debe tener informacion REAL y CONCRETA — nada de frases vagas como "sigue cosechando exitos"
+- Arranca directo con la noticia, sin "Buenas noticias..." ni introducciones genericas
+`;
+
+  if (tiposPrior.length) prompt += `- Priorizá noticias sobre: ${tiposPrior.join(', ')}
+`;
+  if (muletillas) prompt += `- Usa estas frases tipicas de E40 cuando sea natural: ${muletillas}
+`;
+  if (ejstilo) prompt += `
+MODELO DE ESTILO (imitalo exactamente en tono y estructura):
+"${ejstilo}"
+`;
+
+  prompt += `
+${formatoInstr}
+
+Busca en internet las noticias MAS RECIENTES de cada artista. Si no encontras nada de esta semana, usá la noticia mas reciente disponible e indicalo.
+
+Responde UNICAMENTE con JSON valido, sin markdown ni texto adicional:
+{"noticias":[{"artista":"Nombre","noticia":"Texto o guia completa","duracion":"${dur}","formato":"${formato}"}]}`;
+
+  return prompt;
+}
+
+async function genSpecific(type) {
+  const p = P(); if (!p) return;
+  let reqBody = {
+    artists: [], temas: [], fuentes: [], efemerides: false,
+    contextDia: '', contextTemas: '',
+    config: {
+      estilo: document.getElementById('estilo').value,
+      durn: document.getElementById('durn').value,
+      muletillas: document.getElementById('muletillas').value.trim(),
+    },
+    dateStr: new Date().toLocaleDateString('es-AR')
+  };
+
+  if (type === 'artists') {
+    if (!p.artists || !p.artists.length) { alert("Agregá artistas primero."); return; }
+    reqBody.artists = p.artists;
+  } else if (type === 'temas') {
+    if (!p.temas || !p.temas.length) { alert("Agregá temas extra primero."); return; }
+    reqBody.temas = p.temas;
+  } else if (type === 'fuentes') {
+    if (!p.fuentes || !p.fuentes.length) { alert("Agregá fuentes de información primero."); return; }
+    reqBody.fuentes = p.fuentes;
+  } else if (type === 'contexto') {
+    reqBody.efemerides = document.getElementById('chk-efemerides').checked;
+    reqBody.contextDia = document.getElementById('ctx-dia').value.trim();
+    reqBody.contextTemas = document.getElementById('ctx-temas').value.trim();
+    if (!reqBody.efemerides && !reqBody.contextDia && !reqBody.contextTemas) {
+      alert("Completá algún contexto o activá efemérides primero."); return;
+    }
+  } else if (type === 'all') {
+    reqBody.artists = p.artists || [];
+    reqBody.temas = p.temas || [];
+    reqBody.fuentes = p.fuentes || [];
+    reqBody.efemerides = document.getElementById('chk-efemerides').checked;
+    reqBody.contextDia = document.getElementById('ctx-dia').value.trim();
+    reqBody.contextTemas = document.getElementById('ctx-temas').value.trim();
+    if (!reqBody.artists.length && !reqBody.temas.length && !reqBody.fuentes.length && !reqBody.efemerides && !reqBody.contextDia && !reqBody.contextTemas) {
+      alert("No hay nada configurado para buscar."); return;
+    }
+  }
+
+  showSp('Buscando noticias en internet...'); 
+  const statusEl = document.getElementById('nstatus');
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '<div style="font-family:&quot;DM Mono&quot;,monospace;font-size:.68rem;color:var(--amber);animation:blink 1.2s ease infinite;">Buscando y redactando...</div>';
+
+  try {
+    const r = await fetch('/api/generate-news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reqBody)
+    });
+    
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    
+    if (!p.noticias) p.noticias = [];
+    const newNoticias = d.noticias.map(n => ({
+      a: n.tema,
+      t: n.noticia,
+      dur: document.getElementById('durn').value,
+      fmt: document.getElementById('formato').value,
+      src: n.fuente_o_contexto
+    }));
+    
+    // Agregamos las nuevas noticias al principio de la lista
+    p.noticias = [...newNoticias, ...p.noticias];
+    
+    statusEl.innerHTML = '<div style="font-family:&quot;DM Mono&quot;,monospace;font-size:.68rem;color:var(--G);">✓ Nuevas noticias generadas</div>';
+  } catch(e) {
+    statusEl.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--red);">❌ Error: ${e.message}</div>`;
+  }
+  sv(); rN();
+  document.getElementById('brd').disabled = false;
+  document.getElementById('brdh').disabled = false;
+  document.getElementById('bcopyall').style.display = '';
+  document.getElementById('bclrn').style.display = '';
+  hideSp();
+}
+
+async function regenN(i) {
+  const p = P(); if (!p || !p.noticias[i]) return;
+  const a = p.noticias[i].a;
+  const items = document.querySelectorAll('.ni');
+  if (items[i]) { items[i].style.opacity = '.3'; items[i].style.transition = 'opacity .2s'; }
+
+  const reqBody = {
+    artists: [a],
+    temas: [], fuentes: p.fuentes || [], efemerides: false,
+    contextDia: '', contextTemas: '',
+    config: {
+      estilo: document.getElementById('estilo').value,
+      durn: document.getElementById('durn').value,
+      muletillas: document.getElementById('muletillas').value.trim(),
+    },
+    dateStr: new Date().toLocaleDateString('es-AR')
+  };
+
+  try {
+    const r = await fetch('/api/generate-news', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reqBody)
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    
+    const n = d.noticias[0];
+    p.noticias[i].t = n.noticia;
+    p.noticias[i].src = n.fuente_o_contexto;
+    sv();
+  } catch(e) { p.noticias[i].t += ' [Error al actualizar]'; }
+  
+  if (items[i]) items[i].style.opacity = '1';
+  rN();
+}
+
+function randN() {
+  const p = P(); if (!p || !p.noticias.length) return;
+  for (let i = p.noticias.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [p.noticias[i],p.noticias[j]] = [p.noticias[j],p.noticias[i]];
+  }
+  sv();
+  const nl = document.getElementById('nlist');
+  nl.style.opacity='0'; nl.style.transition='opacity .2s';
+  setTimeout(()=>{ rN(); nl.style.opacity='1'; }, 220);
+}
+
+function cpTx(t) { navigator.clipboard.writeText(t).catch(()=>{}); }
+
+function copyAllN() {
+  const p = P(); if (!p || !p.noticias.length) return;
+  const txt = p.noticias.map((n,i) => '[' + (i+1) + '] ' + n.a.toUpperCase() + '\n' + n.t).join('\n\n');
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.getElementById('bcopyall');
+    btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = '📋 Copiar todo'; }, 2000);
+  }).catch(()=>{});
+}
+
+function clrAllN() {
+  if (!confirm('¿Borrar todas las noticias generadas?')) return;
+  const p = P(); if (p) { p.noticias = []; sv(); rN(); }
+  document.getElementById('bcopyall').style.display = 'none';
+  document.getElementById('bclrn').style.display = 'none';
+  document.getElementById('brd').disabled = true;
+  document.getElementById('brdh').disabled = true;
+  document.getElementById('nstatus').style.display = 'none';
+}
+
+function durLabel(dur) {
+  return {corta:'~20 seg', media:'~45 seg', larga:'~90 seg'}[dur] || '';
+}
+
+function rmN(i) {
+  const p = P(); if (!p || !p.noticias[i]) return;
+  p.noticias.splice(i, 1);
+  sv(); rN();
+}
+
+function rN() {
+  const p = P(); const el = document.getElementById('nlist');
+  const hasNews = p && p.noticias && p.noticias.length > 0;
+  
+  document.getElementById('bcopyall').style.display = hasNews ? '' : 'none';
+  document.getElementById('bclrn').style.display = hasNews ? '' : 'none';
+  document.getElementById('brd').disabled = !hasNews;
+  document.getElementById('brdh').disabled = !hasNews;
+
+  if (!hasNews) {
+    el.innerHTML = '<div class="empty">Las noticias aparecerán acá.</div>';
+    return;
+  }
+  el.innerHTML = p.noticias.map((n,i) => {
+    const isGuia = n.fmt === 'guia' || n.t.startsWith('GUIA:');
+    const durTag = n.dur ? `<span style="background:rgba(76,201,240,.1);border:1px solid rgba(76,201,240,.2);border-radius:8px;padding:1px 7px;font-size:.6rem;font-family:'DM Mono',monospace;color:var(--cyan);">${durLabel(n.dur)}</span>` : '';
+    const fmtTag = isGuia ? `<span style="background:rgba(249,168,37,.1);border:1px solid rgba(249,168,37,.2);border-radius:8px;padding:1px 7px;font-size:.6rem;font-family:'DM Mono',monospace;color:var(--amber);">GUIA</span>` : '';
+    return `<div class="ni">
+      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.55rem;flex-wrap:wrap;">
+        <div class="nibdg">🎤 ${n.a}</div>
+        ${durTag}${fmtTag}
+      </div>
+      <div class="nitx" style="${isGuia ? 'font-family:monospace;font-size:.75rem;line-height:1.8;' : ''}">${n.t}</div>
+      ${n.src ? `<div style="margin-top:.5rem;font-size:.65rem;color:var(--mu);font-style:italic;">🔎 ${n.src}</div>` : ''}
+      <div class="niact">
+        <button class="nibtn" onclick="regenN(${i})">🔀 Nueva version</button>
+        <button class="nibtn" onclick='cpTx(${JSON.stringify(n.t)})'>📋 Copiar</button>
+        <button class="nibtn" onclick="toggleDur(${i})" style="font-size:.65rem;">⏱ ${durLabel(n.dur)||'dur'}</button>
+        <button class="nibtn" onclick="rmN(${i})" style="color:var(--red);border-color:var(--red);">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDur(i) {
+  const p = P(); if (!p || !p.noticias[i]) return;
+  const order = ['corta','media','larga'];
+  const cur = p.noticias[i].dur || 'media';
+  p.noticias[i].dur = order[(order.indexOf(cur)+1) % order.length];
+  sv(); rN();
+}
+
+// ═══ ESTRUCTURA ═══
+// Parse bloque selector string into array of 0-indexed block numbers
+function parseNblqs(str, nb) {
+  if (!str) return [];
+  str = str.trim().toLowerCase();
+  if (str === 'todos' || str === 'all') return Array.from({length:nb},(_,i)=>i);
+  const result = new Set();
+  str.split(',').forEach(part => {
+    part = part.trim();
+    if (part.includes('-')) {
+      const [a,b] = part.split('-').map(Number);
+      for (let i=a;i<=b;i++) if(i>=1&&i<=nb) result.add(i-1);
+    } else {
+      const n = parseInt(part);
+      if (!isNaN(n) && n>=1 && n<=nb) result.add(n-1);
+    }
+  });
+  return [...result].sort((a,b)=>a-b);
+}
+
+function drwS() {
+  const blq_hrs = document.getElementById('blq_hrs')?.value || '07:00, 08:00, 09:00, 10:00, 11:00';
+  const startTimes = blq_hrs.split(',').map(s => s.trim()).filter(s => s !== '');
+  const nb = startTimes.length || 1;
+
+  const mxb = +document.getElementById('mxb')?.value||3;
+  const mmb = +document.getElementById('mmb')?.value||40;
+  const ntot = +document.getElementById('ntot')?.value||3;
+  const nblqs = document.getElementById('nblqs')?.value||'2,4';
+  const notBlocks = parseNblqs(nblqs, nb);
+  const hi = startTimes[0] || '07:00';
+  const hf = document.getElementById('hf')?.value||'12:00';
+  
+  const [hhi,hmi] = hi.split(':').map(Number); const [hhf,hmf] = hf.split(':').map(Number);
+  const totMin = (hhf*60+hmf)-(hhi*60+hmi); const durB = Math.max(1,Math.floor(totMin/nb));
+  const mM=mxb*.5, tt=mmb+mM||1;
+  const wM=Math.round(mmb/tt*100), wMe=Math.round(mM/tt*100);
+  let rows = '';
+  // Distribute ntot noticias across notBlocks
+  const notPerBlock = {};
+  notBlocks.forEach((b,i) => { notPerBlock[b] = (notPerBlock[b]||0)+1; });
+  if (notBlocks.length > 0) {
+    let extra = ntot - notBlocks.length;
+    if (extra > 0) {
+      let idx = 0;
+      while (extra > 0) { notPerBlock[notBlocks[idx % notBlocks.length]]++; idx++; extra--; }
+    }
+  }
+  for (let b=0; b<nb; b++) {
+    const timeStr = startTimes[b] || '00:00';
+    const [hh, mn] = timeStr.split(':');
+    const hasNot = notBlocks.includes(b);
+    const notCount = notPerBlock[b] || 0;
+    rows += `<div class="brow">
+      <div class="btime">${hh.padStart(2,'0')}:${mn.padStart(2,'0')}</div>
+      <div class="bbars">
+        <div class="bseg" style="width:${wM}%;background:rgba(76,201,240,.6);"></div>
+        <div class="bseg" style="width:${wMe}%;background:rgba(124,204,30,.6);"></div>
+        ${hasNot ? `<div class="bseg" style="width:8%;min-width:8px;background:rgba(249,168,37,.7);border-radius:2px;"></div>` : ''}
+      </div>
+      <div class="blbl" style="width:80px;">
+        <span style="color:var(--G);">M${mxb}</span>
+        ${hasNot ? `<span style="color:var(--amber);margin-left:4px;">N${notCount}</span>` : ''}
+      </div>
+    </div>`;
+  }
+  document.getElementById('sblocks').innerHTML = rows;
+  document.getElementById('sleg').innerHTML =
+    `<span style="color:var(--cyan);">Musica ${mmb}min/bloque</span>` +
+    `<span style="color:var(--G);">${mxb} menciones/bloque</span>` +
+    `<span style="color:var(--amber);">${ntot} noticias en bloques: ${notBlocks.map(b=>b+1).join(', ')||'ninguno'}</span>` +
+    `<span style="color:var(--mu);">Bloques: ${nb}</span>`;
+}
+
+// ═══ DISTRIBUCION DE MENCIONES ═══
+function distM(nb, mxb) {
+  const p = P(); if (!p) return Array.from({length:nb},()=>[]);
+  let pool = []; p.menciones.forEach(m => { for(let i=0;i<m.cant;i++) pool.push({...m}); });
+  const mid = Math.ceil(nb/2);
+  const f = {primero:[],ultimo:[],manana:[],tarde:[],libre:[]};
+  pool.forEach(m => (m.horario==='primero'?f.primero:m.horario==='ultimo'?f.ultimo:m.horario==='manana'?f.manana:m.horario==='tarde'?f.tarde:f.libre).push(m));
+  const sh = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a; };
+  sh(f.libre); sh(f.manana); sh(f.tarde);
+  const blks = Array.from({length:nb},()=>[]);
+  const tryP = (item, cands) => {
+    for(const b of cands) { if(blks[b].length<mxb && !blks[b].some(x=>x.cli===item.cli)){blks[b].push(item);return true;} }
+    for(const b of cands) { if(blks[b].length<mxb){blks[b].push(item);return true;} }
+    return false;
+  };
+  f.primero.forEach(m=>tryP(m,[0])); f.ultimo.forEach(m=>tryP(m,[nb-1]));
+  f.manana.forEach(m=>tryP(m,Array.from({length:mid},(_,i)=>i)));
+  f.tarde.forEach(m=>tryP(m,Array.from({length:nb-mid},(_,i)=>mid+i)));
+  f.libre.forEach(m=>{ const o=Array.from({length:nb},(_,i)=>i).sort((a,b)=>blks[a].length-blks[b].length); tryP(m,o); });
+  // Reorder within each block: no brand consecutive inside the block
+  const sorted = blks.map(blk => sortNoConsecutive(blk));
+  // Post-process: ensure no brand appears in consecutive blocks either
+  return avoidConsecutiveBlocks(sorted);
+}
+
+// No two adjacent items in the same array share 'cli'
+function sortNoConsecutive(items) {
+  if (items.length <= 1) return items;
+  const freq = {};
+  items.forEach(m => freq[m.cli] = (freq[m.cli]||0)+1);
+  const result = [];
+  let remaining = [...items];
+  let lastCli = null;
+  while (remaining.length > 0) {
+    remaining.sort((a,b) => {
+      const aOk = a.cli !== lastCli ? 1 : 0;
+      const bOk = b.cli !== lastCli ? 1 : 0;
+      if (aOk !== bOk) return bOk - aOk;
+      return (freq[b.cli]||0) - (freq[a.cli]||0);
+    });
+    const pick = remaining.shift();
+    result.push(pick);
+    freq[pick.cli] = (freq[pick.cli]||1) - 1;
+    lastCli = pick.cli;
+  }
+  return result;
+}
+
+// Ensure no brand appears in two consecutive blocks
+// Strategy: for each block, if a brand was in the previous block, swap it with
+// another item further ahead that doesn't cause conflicts.
+function avoidConsecutiveBlocks(blks) {
+  const nb = blks.length;
+  for (let b = 1; b < nb; b++) {
+    const prevBrands = new Set(blks[b-1].map(m => m.cli));
+    for (let i = 0; i < blks[b].length; i++) {
+      if (prevBrands.has(blks[b][i].cli)) {
+        // Try to swap with an item in a later block that doesn't conflict
+        let swapped = false;
+        for (let b2 = b + 1; b2 < nb && !swapped; b2++) {
+          const prevBrands2 = new Set(blks[b2-1].map(m => m.cli));
+          for (let j = 0; j < blks[b2].length && !swapped; j++) {
+            const candidate = blks[b2][j];
+            const currentItem = blks[b][i];
+            // candidate must not be in prev block of b, and currentItem must not be in prev block of b2
+            const candidateOkInB = !prevBrands.has(candidate.cli);
+            const currentOkInB2 = !prevBrands2.has(currentItem.cli);
+            // Also check next block constraints
+            const nextBrandsB = b+1 < nb ? new Set(blks[b+1].map(m=>m.cli)) : new Set();
+            const nextBrandsB2 = b2+1 < nb ? new Set(blks[b2+1].map(m=>m.cli)) : new Set();
+            const candidateOkNextB = !nextBrandsB.has(candidate.cli);
+            const currentOkNextB2 = !nextBrandsB2.has(currentItem.cli);
+            if (candidateOkInB && currentOkInB2 && candidateOkNextB && currentOkNextB2) {
+              blks[b][i] = candidate;
+              blks[b2][j] = currentItem;
+              swapped = true;
+            }
+          }
+        }
+        // If no clean swap found, just move conflicting item to a non-consecutive block
+        // (best-effort: better than strict repetition)
+      }
+    }
+  }
+  return blks;
+}
+
+// ═══ STATUS ═══
+function bldSt() {
+  const p = P();
+  const its = [
+    [!!p,'Programa', p?`${p.nombre} (${p.ini}-${p.fin})`:'Sin programa seleccionado'],
+    [!!(p&&p.menciones.length),'Menciones',p&&p.menciones.length?`${p.menciones.length} clientes — ${p.menciones.reduce((a,m)=>a+m.cant,0)} menciones/dia`:'Sin menciones cargadas'],
+    [!!(p&&p.noticias.length),'Noticias IA',p&&p.noticias.length?`${p.noticias.length} noticias listas`:'Sin noticias — ir a pestana Artistas'],
+    [true,'Estructura',p?`${(p.est?.blq_hrs||'').split(',').length||5} bloques — ${p.est?.mxb||3} menciones/bloque — ${p.est?.ntot||3} noticias en bloques ${p.est?.nblqs||'2,4'}`:'Estructura por defecto'],
+  ];
+  document.getElementById('slist').innerHTML = its.map(([ok,l,m]) =>
+    `<div class="sti ${ok?'ok':'warn'}"><div class="sdot"></div><strong>${l}</strong> — ${m}</div>`).join('');
+}
+
+// ═══ GENERAR RUTINA ═══
+const TC = { m:{l:'🎵 Musica',c:'t-m'}, n:{l:'📰 Noticia',c:'t-n'}, me:{l:'📢 Mencion',c:'t-me'}, t:{l:'⏸ Tanda',c:'t-t'} };
+function appRow(h,tipo,cont) {
+  const tb = document.getElementById('rb'); const cf = TC[tipo]||TC.m;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td style="font-family:monospace;font-size:.72rem;color:var(--mu);">${h}</td>
+    <td><span class="tpill ${cf.c}">${cf.l}</span></td>
+    <td contenteditable="true" style="min-width:200px;">${cont}</td>
+    <td><button class="delr" onclick="this.closest('tr').remove()">✕</button></td>`;
+  tb.appendChild(tr);
+}
+function addRow() {
+  appRow(document.getElementById('nrh')?.value||'00:00', document.getElementById('nrt')?.value||'m', document.getElementById('nrc')?.value||'');
+  if(document.getElementById('nrc')) document.getElementById('nrc').value='';
+}
+function genF() {
+  svE(); const p = P(); if (!p) { alert('Selecciona un programa primero'); return; }
+  showSp('Armando rutina del dia...');
+  setTimeout(() => {
+    const blq_hrs = p.est?.blq_hrs || '07:00, 08:00, 09:00, 10:00, 11:00';
+    const startTimes = blq_hrs.split(',').map(s => s.trim()).filter(s => s !== '');
+    const nb = startTimes.length || 1;
+    const mxb=p.est?.mxb||3;
+    const ntot=p.est?.ntot||3, nblqs=p.est?.nblqs||'2,4';
+    
+    const mBB = distM(nb, mxb);
+    const notBlocks = parseNblqs(nblqs, nb);
+    const notQueue = [];
+    for (let i=0; i<ntot; i++) {
+      if (p.noticias && p.noticias.length) notQueue.push(p.noticias[i % p.noticias.length]);
+    }
+    const notByBlock = {};
+    if (notBlocks.length > 0) {
+      notQueue.forEach((no, i) => {
+        const b = notBlocks[i % notBlocks.length];
+        if (!notByBlock[b]) notByBlock[b] = [];
+        notByBlock[b].push(no);
+      });
+    }
+    
+    document.getElementById('rb').innerHTML = '';
+    document.getElementById('rpn').textContent = p.nombre;
+    
+    for (let b=0; b<nb; b++) {
+      const timeStr = startTimes[b] || '00:00';
+      
+      // La "Entrada" o "Bloque" general
+      appRow(timeStr,'m',`ENTRADA ${timeStr}HS _____________________________________________`); 
+      
+      // Noticias de este bloque
+      const blockNots = notByBlock[b] || [];
+      blockNots.forEach(no => { appRow('','n',`<b>${no.a.toUpperCase()}</b><br>${no.t}`); });
+      
+      // Menciones
+      const bm = mBB[b]||[];
+      if (bm.length) {
+        bm.forEach(m => { 
+          appRow('','me',`<b>${m.cli.toUpperCase()}</b><br>${m.txt || m.tipo}`); 
+        });
+      }
+    }
+    document.getElementById('rwrap').style.display='block';
+    document.getElementById('bpdf').style.display=''; document.getElementById('btxt').style.display='';
+    hideSp(); document.getElementById('rwrap').scrollIntoView({behavior:'smooth'});
+  },1000);
+}
+
+// ═══ EXPORT ═══
+function expTXT() {
+  const p = P(); const dt = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  let meta = `${p?.nombre||''} | ${p?.conductor||''}`;
+  if (p?.productor) meta += ` | PROD: ${p.productor}`;
+  let txt = `E40 RUTIBOT — RUTINA DIARIA\n${meta} | ${dt}\n${'='.repeat(55)}\n\n`;
+  document.querySelectorAll('#rb tr').forEach(tr => {
+    const c = tr.querySelectorAll('td');
+    let cont = (c[2]?.innerHTML||'').replace(/<br\s*[\/]?>/gi, '\n').replace(/<\/?[^>]+(>|$)/g, "").trim();
+    let hora = (c[0]?.textContent||'').trim();
+    if (hora) txt += `\n${cont}\n`; // Entrada title
+    else txt += `${cont}\n\n`; // Mention
+  });
+  txt += `\n${'='.repeat(55)}\nGenerado por E40 RutiBot\n`;
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download = `rutina_e40_${new Date().toISOString().slice(0,10)}.txt`; a.click();
+}
+function expPDF() {
+  const p = P(); const dt = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  let rows = '';
+  document.querySelectorAll('#rb tr').forEach(tr => {
+    const c = tr.querySelectorAll('td');
+    let hora = (c[0]?.textContent||'').trim();
+    let cont = c[2]?.innerHTML||'';
+    if (hora) {
+       rows += `<tr><td colspan="3" style="padding-top:1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#1818a8;border-bottom:2px solid #1818a8;">${cont.replace(/_/g, '')}</td></tr>`;
+    } else {
+       rows += `<tr><td style="width:20px;"></td><td style="width:20px;vertical-align:top;padding-top:.8rem;">${c[1]?.innerHTML||''}</td><td style="padding:.8rem 0;line-height:1.6;font-size:.85rem;">${cont}</td></tr>`;
+    }
+  });
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rutina E40</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'DM Sans',sans-serif;color:#222;padding:1.5cm;font-size:13px;}
+    .hdr{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid #1818a8;padding-bottom:.8rem;margin-bottom:1.5rem;}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:4px;color:#1818a8;}.logo b{color:#5faa10;}
+    .meta{text-align:right;font-family:'DM Mono',monospace;font-size:.65rem;color:#666;line-height:1.7;}
+    table{width:100%;border-collapse:collapse;}
+    td{vertical-align:top;border-bottom:1px solid #eaeaea;}
+    b{font-weight:700;color:#111;font-size:.9rem;}
+    .tpill{display:none;} /* Escondemos las pildoritas de colores en el PDF para que sea mas limpio */
+    .footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.6rem;color:#aaa;}
+    @page{size:A4;margin:1.5cm;} @media print{body{padding:0;} .hdr{border-bottom:3px solid #1818a8 !important; -webkit-print-color-adjust: exact;}}
+  </style></head><body>
+  <div class="hdr">
+    <div><div class="logo">E<b>4</b>0 RutiBot</div><div style="font-size:.85rem;color:#555;margin-top:.4rem;">${p?.nombre||''} — ${p?.conductor||''}${p?.productor ? ' — Prod: ' + p.productor : ''}</div></div>
+    <div class="meta">RUTINA DIARIA<br>${dt}<br>${new Date().toLocaleTimeString('es-AR')}</div>
+  </div>
+  <table><tbody>${rows}</tbody></table>
+  <div class="footer"><span>E40 Radio — RutiBot</span><span>${dt}</span></div>
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ═══ SPINNER ═══
+function showSp(m) { document.getElementById('spmsg').textContent = m||'PROCESANDO...'; document.getElementById('spov').classList.add('on'); }
+function hideSp() { document.getElementById('spov').classList.remove('on'); }
+</script>
+</body>
+</html>
