@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import WordExtractor from 'word-extractor';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-
-const execAsync = promisify(exec);
 
 export async function POST(req: Request) {
   let tempPath = '';
@@ -19,12 +16,15 @@ export async function POST(req: Request) {
     await fs.writeFile(tempPath, buffer);
 
     try {
-      const { stdout } = await execAsync(`textutil -convert txt "${tempPath}" -stdout`);
+      const extractor = new WordExtractor();
+      const extracted = await extractor.extract(tempPath);
+      const text = extracted.getBody();
+      
       await fs.unlink(tempPath).catch(() => {});
-      return NextResponse.json({ text: stdout });
-    } catch (execError) {
+      return NextResponse.json({ text });
+    } catch (execError: any) {
       await fs.unlink(tempPath).catch(() => {});
-      return NextResponse.json({ error: 'Failed to parse .doc file on server. Ensure you are on macOS with textutil available.' }, { status: 500 });
+      return NextResponse.json({ error: 'Error al extraer texto del documento: ' + execError.message }, { status: 500 });
     }
   } catch (error) {
     if (tempPath) await fs.unlink(tempPath).catch(() => {});

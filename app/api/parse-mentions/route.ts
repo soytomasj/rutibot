@@ -1,55 +1,66 @@
 import { NextResponse } from 'next/server';
 
 function parseHeuristic(text: string) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  // Normalize text: replace multiple spaces with single space, but keep line breaks
+  const cleanText = text.replace(/[ \t]+/g, ' ');
+  const lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const menciones = [];
   
   for (let i = 0; i < lines.length; i++) {
-    // Look for the block header, e.g. "BLOQUE 2"
-    if (lines[i].toUpperCase().startsWith('BLOQUE')) {
+    // Look for the block header, e.g. "BLOQUE 2" (case insensitive)
+    const upperLine = lines[i].toUpperCase();
+    if (upperLine.includes('BLOQUE')) {
       let cli = '';
       let dateIdx = -1;
 
-      // Scan the next few lines (up to 5) to find the date pattern
-      for (let offset = 1; offset <= 5; offset++) {
-        if (i + offset < lines.length && /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})/.test(lines[i + offset])) {
-           dateIdx = i + offset;
-           cli = lines[dateIdx - 1];
-           break;
+      // Scan the next few lines (up to 8) to find a date pattern (DD/MM/YYYY)
+      for (let offset = 1; offset <= 8; offset++) {
+        if (i + offset < lines.length) {
+          const line = lines[i + offset];
+          // Match 31/03/2026 or 2026-03-31
+          if (/^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/.test(line)) {
+             dateIdx = i + offset;
+             // The client name is usually the line before the date
+             cli = lines[dateIdx - 1];
+             break;
+          }
         }
       }
 
-      if (dateIdx !== -1 && cli && cli !== 'Producto' && cli !== 'ESTACION40' && !cli.toUpperCase().startsWith('BLOQUE')) {
+      if (dateIdx !== -1 && cli && !cli.toLowerCase().includes('producto') && !cli.toLowerCase().includes('estacion40') && !cli.toUpperCase().startsWith('BLOQUE')) {
          let txt = '';
          let j = dateIdx + 1;
          
          while (
            j < lines.length && 
-           !lines[j].toUpperCase().startsWith('BLOQUE') && 
+           !lines[j].toUpperCase().includes('BLOQUE') && 
            lines[j].toLowerCase() !== 'bloques' &&
-           !/^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})/.test(lines[j])
+           !/^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/.test(lines[j])
          ) {
            const lowerL = lines[j].toLowerCase();
+           // Filter out common header words
            if (['posicion', 'medio', 'producto', 'fecha', 'texto', '=>', 'bloque'].includes(lowerL)) {
-              // skip header word
+              // skip
            } else if (!isNaN(parseInt(lines[j], 10)) && lines[j].length <= 3) {
-              // skip solitary position numbers
-           } else if (lines[j].toUpperCase() === 'ESTACION40' || lines[j].toUpperCase().includes('ELEGIDOS 40')) {
-              // skip media/station name
+              // skip solitary numbers (like position)
+           } else if (lowerL.includes('estacion40') || lowerL.includes('elegidos 40')) {
+              // skip radio name
            } else {
              txt += lines[j] + ' ';
            }
            j++;
          }
 
-         menciones.push({
-           cli: cli,
-           tipo: 'Mencion Live',
-           cant: 1,
-           txt: txt.trim()
-         });
+         if (txt.trim().length > 5) {
+           menciones.push({
+             cli: cli.toUpperCase(),
+             tipo: 'Mencion Live',
+             cant: 1,
+             txt: txt.trim()
+           });
+         }
 
-         i = j - 1; // Skip ahead to where we stopped
+         i = j - 1; 
       }
     }
   }
@@ -81,7 +92,7 @@ export async function POST(req: Request) {
 
     // 2. If heuristic yields 0, try AI fallback if process.env.GEMINI_API_KEY exists
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'No se encontraron menciones con el formato esperado. Por favor, asegúrate de haber guardado la variable GEMINI_API_KEY en Vercel y haber hecho un Redeploy.' }, { status: 400 });
+      return NextResponse.json({ error: 'No se encontraron menciones con el formato esperado. Por favor, asegúrate de haber guardado la variable GEMINI_API_KEY en Vercel (Settings -> Environment Variables) y haber hecho un Redeploy.' }, { status: 400 });
     }
 
     const pr = `Analiza el siguiente texto de un archivo comercial de radio argentina. Extrae TODAS las menciones comerciales. Para cada una identifica: cli (cliente), tipo (Mencion Live, Spot Grabado, etc), cant (veces por dia), txt (guion). Responde UNICAMENTE con JSON valido: {"menciones":[{"cli":"nombre","tipo":"Mencion Live","cant":1,"txt":"texto"}]}\n\nTEXTO:\n"""\n${text.substring(0, 3500)}\n"""\nSi no hay menciones claras responde: {"menciones":[]}`;
