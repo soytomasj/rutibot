@@ -436,8 +436,7 @@ textarea{resize:vertical;min-height:80px;}select option{background:#2424bc;}
         </div>
         <div class="fg">
           <label>Horarios de entrada de bloques</label>
-          <input type="text" id="blq_hrs" value="07:00, 08:00, 09:00, 10:00, 11:00" placeholder="Ej: 1510 1525..." oninput="drwS()" onblur="smartTime(this)">
-          <div style="font-size:.68rem;color:var(--mu);margin-top:.3rem;font-family:'DM Mono',monospace;">Escribí números de corrido (ej: 1510) y al salir se formatean solos.</div>
+          <input type="text" id="blq_hrs" value="07:00, 08:00, 09:00, 10:00, 11:00" placeholder="Ej: 1510 1525..." oninput="smartTime(this)">
         </div>
         <div class="fg"><label>Duracion tanda (min)</label><input type="number" id="dt" value="3" min="1" max="15"></div>
         <div class="div"></div>
@@ -1157,14 +1156,13 @@ function parseNblqs(str, nb) {
 
 function smartTime(el) {
   let val = el.value.replace(/[^\d]/g, '');
-  if (val.length >= 4) {
-    let chunks = val.match(/.{1,4}/g) || [];
-    let formatted = chunks.map(c => {
-      if (c.length === 4) return c.substring(0,2) + ':' + c.substring(2,4);
-      return c;
-    }).join(', ');
-    el.value = formatted;
+  let formatted = "";
+  for (let i = 0; i < val.length; i++) {
+    if (i > 0 && i % 4 === 0) formatted += ", ";
+    if (i > 0 && i % 4 === 2) formatted += ":";
+    formatted += val[i];
   }
+  el.value = formatted;
   drwS();
 }
 
